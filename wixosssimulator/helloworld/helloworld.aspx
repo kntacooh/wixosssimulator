@@ -10,7 +10,9 @@
 <body>
     <form id="form1" runat="server">
     <div>
-    <% Response.Write("Hello, world!"); %>
+    <% 
+        Response.Write("Hello, world!");
+    %>
     </div>
     </form>
 </body>
