@@ -55,7 +55,8 @@ namespace wixosssimulator.components.card
         /// <summary> テキストを配列に変換</summary>
         private static string[] ConvertTextToArray(string text)
         {
-            return text.Split('/');
+            if (false) { return null; }
+            else { return text.Split('/'); }
         }
     }
 }
