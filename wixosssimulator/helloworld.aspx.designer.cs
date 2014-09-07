@@ -10,7 +10,7 @@
 namespace wixosssimulator {
     
     
-    public partial class WebForm1 {
+    public partial class helloworldInherits {
         
         /// <summary>
         /// form1 コントロール。

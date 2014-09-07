@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="helloworld.aspx.cs" Inherits="wixosssimulator.WebForm1" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="helloworld.aspx.cs" Inherits="wixosssimulator.helloworldInherits" %>
 
 <!DOCTYPE html>
 
@@ -11,6 +11,7 @@
     <form id="form1" runat="server">
     <div>
     <% 
+        wixosssimulator.components.card.Card card = new wixosssimulator.components.card.Card();
         Response.Write("Hello, world!");
     %>
     </div>

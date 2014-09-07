@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace wixosssimulator.components
 {
@@ -14,46 +16,32 @@ namespace wixosssimulator.components
         /// <returns></returns>
         public static string GetHtmlDocument(string path)
         {
-            string loadingUri;
-            Uri targetUri = new Uri(path);
-            if (targetUri.IsFile ||
-                targetUri.IsAbsoluteUri)
-            {
-                loadingUri = targetUri.AbsoluteUri;
-            }
-            else
-            {
-                return null;
-            }
+            Uri pathUri = new Uri(path);
+            if (!(pathUri.IsFile || pathUri.IsAbsoluteUri)) return null;
+            string address = pathUri.AbsoluteUri;
 
-            // HTMLテキスト…？を仮に取得して文字コードをセット
             try
             {
-                System.Net.WebClient client = new System.Net.WebClient();
-                string tempDocument = client.DownloadString(loadingUri);
-                System.Text.RegularExpressions.Regex AbstCharSet =
-                    new System.Text.RegularExpressions.Regex(@"<head>.*?charset=(?<charset>.*?)[\s"";].*?</head>",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase |
-                    System.Text.RegularExpressions.RegexOptions.Singleline);
-                System.Text.RegularExpressions.Match MatchCharSet =
-                    AbstCharSet.Match(tempDocument);
-                if (MatchCharSet.Success)
+                // 仮にHTMLドキュメントを取得
+                WebClient client = new WebClient();
+                string tempDocument = client.DownloadString(address);
+
+                // charsetを検索
+                Regex r = new System.Text.RegularExpressions.Regex(@"<head>.*?charset=(?<charset>.*?)[\s"";].*?</head>",
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                Match m = r.Match(tempDocument);
+
+                if (m.Success)
                 {
-                    try
-                    {
-                        client.Encoding = Encoding.GetEncoding(MatchCharSet.Groups["charset"].Value);
-                    }
-                    catch
-                    {
-                        client.Encoding = Encoding.UTF8;
-                    }
+                    try { client.Encoding = Encoding.GetEncoding(m.Groups["charset"].Value); }
+                    catch { client.Encoding = Encoding.UTF8; }
                 }
                 else
                 {
                     client.Encoding = Encoding.UTF8;
                 }
                 // HTMLテキスト…？を取得
-                return client.DownloadString(loadingUri);
+                return client.DownloadString(address);
             }
             catch
             {

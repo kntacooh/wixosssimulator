@@ -49,17 +49,27 @@ namespace wixosssimulatorTest.components.card
             CollectionAssert.AreEqual(arrayHanayoAndYuduki, lrigType.Array);
         }
 
+        // text == "" のとき空の配列にする
+
         [TestMethod]
         public void LrigTypeなしの場合()
         {
             string text = "";
-            string[] array = { "" };
+            string[] array = { };
             LrigType lrigType = new LrigType(text);
             Assert.AreEqual(text, lrigType.Text);
             CollectionAssert.AreEqual(array, lrigType.Array);
-            Assert.AreEqual(lrigType.Array.Length, 1);
+            //Assert.AreEqual(lrigType.Array.Length, 1);
             //Assert.IsNull(lrigType.Array);
             //CollectionAssert.AreEqual(array, lrigType.Array);
+        }
+
+        [TestMethod]
+        public void LrigType_nullで初期化_null()
+        {
+            LrigType lrigType = new LrigType();
+            Assert.IsNull(lrigType.Text);
+            //CollectionAssert.AreEqual(arrayHanayoAndYuduki, lrigType.Array);
         }
     }
 }

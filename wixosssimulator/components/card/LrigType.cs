@@ -8,8 +8,8 @@ namespace wixosssimulator.components.card
     /// <summary> ルリグタイプを表すクラス。 </summary>
     public class LrigType
     {
-        private string text;
-        private string[] array;
+        private string text = null;
+        private string[] array = null;
 
         /// <summary> ルリグタイプを表すテキスト </summary>
         public string Text
@@ -30,6 +30,11 @@ namespace wixosssimulator.components.card
                 this.array = value;
                 this.text = ConvertArrayToText(this.array);
             }
+        }
+
+        public LrigType()
+        {
+
         }
 
         public LrigType(string text)
@@ -55,7 +60,7 @@ namespace wixosssimulator.components.card
         /// <summary> テキストを配列に変換</summary>
         private static string[] ConvertTextToArray(string text)
         {
-            if (false) { return null; }
+            if (text == "") { return new string[0]; }
             else { return text.Split('/'); }
         }
     }

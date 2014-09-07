@@ -65,8 +65,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="test\WebForm1.aspx" />
     <Content Include="Web.config" />
-    <Content Include="helloworld\helloworld.aspx" />
+    <Content Include="helloworld.aspx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="components\card\Ability.cs" />
@@ -78,19 +79,24 @@
     <Compile Include="components\card\Color.cs" />
     <Compile Include="components\Stream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="helloworld\helloworld.aspx.cs">
+    <Compile Include="helloworld.aspx.cs">
       <DependentUpon>helloworld.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="helloworld\helloworld.aspx.designer.cs">
+    <Compile Include="helloworld.aspx.designer.cs">
       <DependentUpon>helloworld.aspx</DependentUpon>
     </Compile>
     <Compile Include="components\card\Card.cs" />
+    <Compile Include="test\WebForm1.aspx.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="test\WebForm1.aspx.designer.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="helloworld\NewFolder1\" />
-    <Folder Include="test\" />
-    <Folder Include="wixoss\" />
+    <Folder Include="wixoss\simulator\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
