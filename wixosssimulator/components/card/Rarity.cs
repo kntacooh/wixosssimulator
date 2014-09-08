@@ -5,7 +5,7 @@ using System.Web;
 
 namespace wixosssimulator.components.card
 {
-    /// <summary> カードのレアリティを表す列挙型。 </summary>
+    /// <summary> カードのレアリティを表す列挙値を提供します。 </summary>
     public enum Rarity
     {
         C, R, LC, SR, LR, Secret = 9,

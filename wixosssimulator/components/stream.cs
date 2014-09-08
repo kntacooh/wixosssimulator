@@ -11,8 +11,8 @@ namespace wixosssimulator.components
 {
     public class Stream
     {
-        /// <summary> HTMLファイルの内容を文字コードを合わせて取得 </summary>
-        /// <param name="path"> ローカルまたはインターネット上のアドレス </param>
+        /// <summary> HTMLファイルの内容を文字コードを合わせて取得します。 </summary>
+        /// <param name="path"> ローカルまたはインターネット上のアドレス。 </param>
         /// <returns></returns>
         public static string GetHtmlDocument(string path)
         {

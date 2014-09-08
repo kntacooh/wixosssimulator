@@ -5,63 +5,63 @@ using System.Web;
 
 namespace wixosssimulator.components.card
 {
-    /// <summary> ルリグタイプを表すクラス。 </summary>
+    /// <summary> ルリグタイプを示すテキストと、各ルリグタイプを示す文字列のリストを表します。 </summary>
     public class LrigType
     {
-        private string text = null;
-        private string[] array = null;
+        private string text;
+        private string[] textList;
 
-        /// <summary> ルリグタイプを表すテキスト </summary>
+        /// <summary> ルリグタイプを示すテキストを取得します。 </summary>
         public string Text
         {
             get { return this.text; }
-            set
-            {
-                this.text = value;
-                this.array = ConvertTextToArray(this.text);
-            }
+            set { SetText(value, true); }
         }
-        /// <summary> 各ルリグタイプの文字列を表す配列 </summary>
-        public string[] Array
+        /// <summary> 各ルリグタイプを示す文字列のリストを取得します。 </summary>
+        public string[] TextList
         {
-            get { return this.array; }
-            set
-            {
-                this.array = value;
-                this.text = ConvertArrayToText(this.array);
-            }
+            get { return this.textList; }
+            set { SetTextList(value, true); }
         }
 
-        public LrigType()
+        /// <summary> ルリグタイプを示すテキストを指定して新しいオブジェクトを初期化します。 </summary>
+        /// <param name="text"> ルリグタイプを示すテキスト。 </param>
+        public LrigType(string text) { Text = text; }
+        /// <summary> 各ルリグタイプを示す文字列のリストを指定して、新しいオブジェクトを初期化します。 </summary>
+        /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
+        public LrigType(string[] textList) { TextList = textList; }
+
+        /// <summary> 各ルリグタイプを示す文字列のリストを、ルリグタイプを示すテキストに変換します。</summary>
+        public static string ConvertListToText(string[] textList)
         {
-
+            return string.Join("/", textList);
         }
-
-        public LrigType(string text)
-        {
-            this.Text = text;
-        }
-
-        public LrigType(string[] array)
-        {
-            this.Array = array;
-        }
-
-        /// <summary> テキストのみを代入 </summary>
-        public void SetSeparately(string text) { this.text = text; }
-        /// <summary> 配列のみを代入 </summary>
-        public void SetSeparately(string[] array) { this.array = array; }
-
-        /// <summary> 配列をテキストに変換</summary>
-        private static string ConvertArrayToText(string[] array)
-        {
-            return string.Join("/", array);
-        }
-        /// <summary> テキストを配列に変換</summary>
-        private static string[] ConvertTextToArray(string text)
+        /// <summary> ルリグタイプを示すテキストを、各ルリグタイプを示す文字列のリストに変換します。</summary>
+        public static string[] ConvertTextToList(string text)
         {
             if (text == "") { return new string[0]; }
             else { return text.Split('/'); }
         }
+
+        /// <summary> ルリグタイプを示すテキストのみを変更します。 </summary>
+        public void SetSeparately(string text) { SetText(text, false); }
+        /// <summary> 各ルリグタイプを示す文字列のリストのみを変更します。 </summary>
+        public void SetSeparately(string[] textList) { SetText(text, false); }
+
+        /// <summary> 各ルリグタイプを示す文字列のリストをメンバに代入します。 </summary>
+        private void SetText(string text, bool isConbine)
+        {
+            text = text ?? "";
+            this.text = text.Trim();
+            if (isConbine) { SetTextList(ConvertTextToList(this.Text), false); }
+        }
+        /// <summary> ルリグタイプを示すテキストをメンバに代入します。 </summary>
+        private void SetTextList(string[] textList, bool isConbine)
+        {
+            textList = textList ?? new string[0];
+            this.textList = textList.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            if (isConbine) { SetText(ConvertListToText(this.TextList), false); }
+        }
+
     }
 }
