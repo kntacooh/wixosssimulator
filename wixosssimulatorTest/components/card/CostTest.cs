@@ -97,17 +97,18 @@ namespace wixosssimulatorTest.components.card
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Cost_要素不足の配列で初期化()
+        {
+            Cost cost = new Cost(配列_要素不足);
+        }
+
+        [TestMethod]
         public void Cost_要素過剰の配列で初期化()
         {
             Cost cost = new Cost(配列_要素過剰);
             CollectionAssert.AreEqual(連想配列Full_全0, cost.Value);
             CollectionAssert.AreEqual(配列_全0, cost.GetArray());
-        }
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Cost_要素不足の配列で初期化()
-        {
-            Cost cost = new Cost(配列_要素不足);
         }
     }
 }

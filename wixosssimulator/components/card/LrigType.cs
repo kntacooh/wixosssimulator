@@ -5,7 +5,7 @@ using System.Web;
 
 namespace wixosssimulator.components.card
 {
-    /// <summary> ルリグタイプを示すテキストと、各ルリグタイプを示す文字列のリストを表します。 </summary>
+    /// <summary> ルリグタイプについての情報を表します。 </summary>
     public class LrigType
     {
         private string text;
@@ -32,11 +32,15 @@ namespace wixosssimulator.components.card
         public LrigType(string[] textList) { TextList = textList; }
 
         /// <summary> 各ルリグタイプを示す文字列のリストを、ルリグタイプを示すテキストに変換します。</summary>
+        /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
+        /// <returns> ルリグタイプを示すテキスト。 </returns>
         public static string ConvertListToText(string[] textList)
         {
             return string.Join("/", textList);
         }
         /// <summary> ルリグタイプを示すテキストを、各ルリグタイプを示す文字列のリストに変換します。</summary>
+        /// <param name="text"> ルリグタイプを示すテキスト。 </param>
+        /// <returns> 各ルリグタイプを示す文字列のリスト。 </returns>
         public static string[] ConvertTextToList(string text)
         {
             if (text == "") { return new string[0]; }
@@ -44,11 +48,15 @@ namespace wixosssimulator.components.card
         }
 
         /// <summary> ルリグタイプを示すテキストのみを設定します。 </summary>
-        public void SetSeparately(string text) { SetText(text, false); }
+        /// <param name="text"> ルリグタイプを示すテキスト。 </param>
+        public void SetOnlyText(string text) { SetText(text, false); }
         /// <summary> 各ルリグタイプを示す文字列のリストのみを設定します。 </summary>
-        public void SetSeparately(string[] textList) { SetText(text, false); }
+        /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
+        public void SetonlyTextList(string[] textList) { SetTextList(textList, false); }
 
         /// <summary> 各ルリグタイプを示す文字列のリストを整形してプライベートメンバに代入します。 </summary>
+        /// <param name="text"> ルリグタイプを示すテキスト。 </param>
+        /// <param name="isConbine"> プロパティを連動して変更させるかどうか。 </param>
         private void SetText(string text, bool isConbine)
         {
             text = text ?? "";
@@ -56,6 +64,8 @@ namespace wixosssimulator.components.card
             if (isConbine) { SetTextList(ConvertTextToList(this.Text), false); }
         }
         /// <summary> ルリグタイプを示すテキストを整形してプライベートメンバに代入します。 </summary>
+        /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
+        /// <param name="isConbine"> プロパティを連動して変更させるかどうか。 </param>
         private void SetTextList(string[] textList, bool isConbine)
         {
             textList = textList ?? new string[0];
