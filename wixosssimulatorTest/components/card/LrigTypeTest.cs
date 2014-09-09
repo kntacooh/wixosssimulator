@@ -3,12 +3,10 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System.Diagnostics;
-
 namespace wixosssimulatorTest.components.card
 {
     [TestClass]
-    public class LrigTypeTests
+    public class LrigTypeTest
     {
         string 文字列_なし = "";
         string[] 配列_なし = { };
@@ -71,7 +69,7 @@ namespace wixosssimulatorTest.components.card
         }
 
         [TestMethod]
-        public void LrigType_文字列の前後の空白を削除させる()
+        public void LrigType_文字列で初期化_前後の空白を削除させる()
         {
             LrigType lrigType = new LrigType(文字列_空白のみ);
             Assert.AreEqual(文字列_なし, lrigType.Text);
@@ -83,7 +81,7 @@ namespace wixosssimulatorTest.components.card
         }
 
         [TestMethod]
-        public void LrigType_配列中の空白とnull要素を削除させる()
+        public void LrigType_配列で初期化_空白とnull要素を削除させる()
         {
             LrigType lrigType = new LrigType(配列_空白とnull要素のみ);
             Assert.AreEqual(文字列_なし, lrigType.Text);
@@ -92,6 +90,20 @@ namespace wixosssimulatorTest.components.card
             LrigType lrigType2 = new LrigType(配列_花代とユヅキ_空白とnull要素含む);
             Assert.AreEqual(文字列_花代とユヅキ, lrigType2.Text);
             CollectionAssert.AreEqual(配列_花代とユヅキ, lrigType2.TextList);
+        }
+
+        [TestMethod]
+        public void LrigType_文字列と配列が連動して変更されているかどうか()
+        {
+            LrigType lrigType = new LrigType(文字列_なし);
+
+            lrigType.Text = 文字列_タマ;
+            Assert.AreEqual(文字列_タマ, lrigType.Text);
+            CollectionAssert.AreEqual(配列_タマ, lrigType.TextList);
+
+            lrigType.TextList = 配列_花代とユヅキ;
+            Assert.AreEqual(文字列_花代とユヅキ, lrigType.Text);
+            CollectionAssert.AreEqual(配列_花代とユヅキ, lrigType.TextList);
         }
 
         [TestMethod]
@@ -106,8 +118,24 @@ namespace wixosssimulatorTest.components.card
             lrigType.TextList = null;
             Assert.AreEqual(文字列_なし, lrigType.Text);
             CollectionAssert.AreEqual(配列_なし, lrigType.TextList);
+        }
 
-            // lrigType.SetSeparately(null); // これはエラーになる
+        [TestMethod]
+        public void LrigType_nullを表す文字列で初期化()
+        {
+            string 文字列_null = null;
+            LrigType lrigType = new LrigType(文字列_null);
+            Assert.AreEqual(文字列_なし, lrigType.Text);
+            CollectionAssert.AreEqual(配列_なし, lrigType.TextList);
+        }
+
+        [TestMethod]
+        public void LrigType_nullを表す配列で初期化()
+        {
+            string[] 配列_null = null;
+            LrigType lrigType = new LrigType(配列_null);
+            Assert.AreEqual(文字列_なし, lrigType.Text);
+            CollectionAssert.AreEqual(配列_なし, lrigType.TextList);
         }
     }
 }

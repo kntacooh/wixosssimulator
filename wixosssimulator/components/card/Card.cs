@@ -106,47 +106,47 @@ namespace wixosssimulator.components.card
     //    }
     //}
 
-    public class Lrig : Card
-    {
-        public string Id { get; set; }
-        public string Kana { get; set; } // 全角カナのみのチェックを行う?
-        public string Illust { get; set; }
-        public Rarity Rarity { get; set; }
-        public string FlevorText { get; set; }
+    //public class Lrig : Card
+    //{
+    //    public string Id { get; set; }
+    //    public string Kana { get; set; } // 全角カナのみのチェックを行う?
+    //    public string Illust { get; set; }
+    //    public Rarity Rarity { get; set; }
+    //    public string FlevorText { get; set; }
 
-        public string Name { get; set; }
+    //    public string Name { get; set; }
 
-        public Type Type { get; set; }
+    //    public Type Type { get; set; }
 
-        public Color Color { get; set; }
-        public string Text { get; set; }
-        public byte Level { get; set; }
-        private Cost Cost { get; set; }
-        public Cost GrowCost { get; set; }
-        public byte Limit { get; set; }
-        public LrigType LrigType { get; set; }
-        private LrigType Condition { get; set; }
-        private Class Class { get; set; }
-        private int Power { get; set; }
+    //    public Color Color { get; set; }
+    //    public string Text { get; set; }
+    //    public byte Level { get; set; }
+    //    private Cost Cost { get; set; }
+    //    public Cost GrowCost { get; set; }
+    //    public byte Limit { get; set; }
+    //    public LrigType LrigType { get; set; }
+    //    private LrigType Condition { get; set; }
+    //    private Class Class { get; set; }
+    //    private int Power { get; set; }
 
-        public Ability[] Ability { get; set; }
+    //    public Ability[] Ability { get; set; }
 
-        public Lrig()
-        {
-            foreach (PropertyInfo p in this.GetType().GetProperties())
-            {
-                p.SetValue(this, null);
-            }
-        }
+    //    public Lrig()
+    //    {
+    //        foreach (PropertyInfo p in this.GetType().GetProperties())
+    //        {
+    //            p.SetValue(this, null);
+    //        }
+    //    }
 
-        /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
-        public bool IsValid()
-        {
+    //    /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
+    //    public bool IsValid()
+    //    {
             
-            return false;
-        }
+    //        return false;
+    //    }
     
-    }
+    //}
 
     public interface ICard
     {
