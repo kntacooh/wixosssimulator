@@ -16,9 +16,11 @@ namespace wixosssimulatorTest.components.card
         string 文字列_タマ_前後空白含む = " 　タマ  　 　　 ";
         string[] 配列_タマ = { "タマ" };
         string 文字列_花代とユヅキ = "花代/ユヅキ";
+        string 文字列_花代とユヅキ_中空白含む = "  花代 　 /　　ユヅキ　　";
         string[] 配列_花代とユヅキ = { "花代", "ユヅキ" };
         string[] 配列_花代とユヅキ_空白とnull要素含む
             = { "  ", "", "花代", "", "     ", "　　　　　　", " ", "ユヅキ", "     ", null, "　　　　", "　　 　  　", null };
+        string[] 配列_花代とユヅキ_前後空白含む = { " 花代　　", "　 　ユヅキ 　" };
 
         [TestMethod]
         public void LrigType_文字列で初期化_なし()
@@ -69,7 +71,7 @@ namespace wixosssimulatorTest.components.card
         }
 
         [TestMethod]
-        public void LrigType_文字列で初期化_前後の空白を削除させる()
+        public void LrigType_文字列で初期化_前後や中の空白を削除させる()
         {
             LrigType lrigType = new LrigType(文字列_空白のみ);
             Assert.AreEqual(文字列_なし, lrigType.Text);
@@ -78,10 +80,14 @@ namespace wixosssimulatorTest.components.card
             LrigType lrigType2 = new LrigType(文字列_タマ_前後空白含む);
             Assert.AreEqual(文字列_タマ, lrigType2.Text);
             CollectionAssert.AreEqual(配列_タマ, lrigType2.TextList);
+
+            LrigType lrigType3 = new LrigType(文字列_花代とユヅキ_中空白含む);
+            Assert.AreEqual(文字列_花代とユヅキ, lrigType3.Text);
+            CollectionAssert.AreEqual(配列_花代とユヅキ, lrigType3.TextList);
         }
 
         [TestMethod]
-        public void LrigType_配列で初期化_空白とnull要素を削除させる()
+        public void LrigType_配列で初期化_空白やnull要素を削除させる()
         {
             LrigType lrigType = new LrigType(配列_空白とnull要素のみ);
             Assert.AreEqual(文字列_なし, lrigType.Text);
@@ -90,6 +96,10 @@ namespace wixosssimulatorTest.components.card
             LrigType lrigType2 = new LrigType(配列_花代とユヅキ_空白とnull要素含む);
             Assert.AreEqual(文字列_花代とユヅキ, lrigType2.Text);
             CollectionAssert.AreEqual(配列_花代とユヅキ, lrigType2.TextList);
+
+            LrigType lrigType3 = new LrigType(配列_花代とユヅキ_前後空白含む);
+            Assert.AreEqual(文字列_花代とユヅキ, lrigType3.Text);
+            CollectionAssert.AreEqual(配列_花代とユヅキ, lrigType3.TextList);
         }
 
         [TestMethod]
@@ -109,15 +119,15 @@ namespace wixosssimulatorTest.components.card
         [TestMethod]
         public void LrigType_nullを指定しても空の文字列or配列が代入されるかどうか()
         {
-            LrigType lrigType = new LrigType(文字列_なし);
-
+            LrigType lrigType = new LrigType(文字列_タマ);
             lrigType.Text = null;
             Assert.AreEqual(文字列_なし, lrigType.Text);
             CollectionAssert.AreEqual(配列_なし, lrigType.TextList);
 
-            lrigType.TextList = null;
-            Assert.AreEqual(文字列_なし, lrigType.Text);
-            CollectionAssert.AreEqual(配列_なし, lrigType.TextList);
+            LrigType lrigType2 = new LrigType(文字列_タマ);
+            lrigType2.TextList = null;
+            Assert.AreEqual(文字列_なし, lrigType2.Text);
+            CollectionAssert.AreEqual(配列_なし, lrigType2.TextList);
         }
 
         [TestMethod]

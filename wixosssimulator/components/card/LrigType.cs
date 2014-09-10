@@ -26,10 +26,10 @@ namespace wixosssimulator.components.card
 
         /// <summary> ルリグタイプを示すテキストを指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="text"> ルリグタイプを示すテキスト。 </param>
-        public LrigType(string text) { Text = text; }
+        public LrigType(string text) { this.Text = text; }
         /// <summary> 各ルリグタイプを示す文字列のリストを指定して、新しいインスタンスを初期化します。 </summary>
         /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
-        public LrigType(string[] textList) { TextList = textList; }
+        public LrigType(string[] textList) { this.TextList = textList; }
 
         /// <summary> 各ルリグタイプを示す文字列のリストを、ルリグタイプを示すテキストに変換します。</summary>
         /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
@@ -59,9 +59,8 @@ namespace wixosssimulator.components.card
         /// <param name="isConbine"> プロパティを連動して変更させるかどうか。 </param>
         private void SetText(string text, bool isConbine)
         {
-            text = text ?? "";
-            this.text = text.Trim();
-            if (isConbine) { SetTextList(ConvertTextToList(this.Text), false); }
+            this.text = text ?? "";
+            if (isConbine) { SetTextList(ConvertTextToList(this.Text), true); }
         }
         /// <summary> ルリグタイプを示すテキストを整形してプライベートメンバに代入します。 </summary>
         /// <param name="textList"> 各ルリグタイプを示す文字列のリスト。 </param>
@@ -69,9 +68,10 @@ namespace wixosssimulator.components.card
         private void SetTextList(string[] textList, bool isConbine)
         {
             textList = textList ?? new string[0];
-            this.textList = textList.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            this.textList = (from s in textList where !string.IsNullOrWhiteSpace(s) select s.Trim()).ToArray();
+            //this.textList = textList.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).ToArray(); //上と全く同じ
             if (isConbine) { SetText(ConvertListToText(this.TextList), false); }
         }
-
+            
     }
 }

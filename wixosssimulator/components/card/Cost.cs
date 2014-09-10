@@ -27,7 +27,7 @@ namespace wixosssimulator.components.card
         public Cost(Dictionary<Color, byte> value)
         {
             InitializeValue();
-            Value = value;
+            this.Value = value;
         }
         /// <summary> 色ごとのコストを示す配列を指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="value"> 色ごとのコストを表す配列。 </param>
@@ -44,7 +44,7 @@ namespace wixosssimulator.components.card
             int[] i = new int[Enum.GetValues(typeof(Color)).Length];
             Enum.GetValues(typeof(Color)).CopyTo(i, 0);
             byte[] value = new byte[i.Max() + 1];
-            foreach (KeyValuePair<Color, byte> v in Value) { value[(int)v.Key] = v.Value; }
+            foreach (KeyValuePair<Color, byte> v in this.Value) { value[(int)v.Key] = v.Value; }
             return value;
         }
         /// <summary> 配列から色ごとのコストを設定します。配列の添字は、Color列挙値に対応するすべての数値を含まなければなりません。
@@ -57,14 +57,14 @@ namespace wixosssimulator.components.card
             Enum.GetValues(typeof(Color)).CopyTo(i, 0);
             //1次元配列は常に value.GetLowerBound(0) = 0 なのだろうか?
             if (!(value.GetLowerBound(0) <= i.Min() && i.Max() <= value.GetUpperBound(0))) { throw new ArgumentException("Color列挙値に対応するすべての数値を添字に含んでいません。", "value"); }
-            foreach (Color c in Enum.GetValues(typeof(Color))) { Value[c] = value[(int)c]; }
+            foreach (Color c in Enum.GetValues(typeof(Color))) { this.Value[c] = value[(int)c]; }
         }
 
         /// <summary> 色ごとのコストを示す連想配列を初期化します。 </summary>
         private void InitializeValue()
         {
             value = new Dictionary<Color, byte>();
-            foreach (Color c in Enum.GetValues(typeof(Color))) { Value[c] = 0; }
+            foreach (Color c in Enum.GetValues(typeof(Color))) { this.Value[c] = 0; }
         }
     }
 }
