@@ -5,47 +5,60 @@ using System.Web;
 
 using System.Reflection;
 
-namespace wixosssimulator.components.card
+namespace WixossSimulator.Card
 {
     /// <summary> それぞれのカードに含まれるすべての情報を表します。 </summary>
     public class Card
     {
+        private TypeKind type;
+        /// <summary> カードの種類に応じて呼び出されるメソッドを取得します。 </summary>
+        private ITypeStrategy methodForEachType;
+
         public string Id { get; set; }
         public string Kana { get; set; } // 全角カナのみのチェックを行う?
         public string Illust { get; set; }
-        public Rarity Rarity { get; set; }
+        public RarityKind Rarity { get; set; }
         public string FlevorText { get; set; }
 
         public string Name { get; set; }
 
-        public Type Type { get; set; }
+        public TypeKind Type 
+        {
+            get { return this.type; }
+            set
+            {
+                this.type = value;
+                switch (this.Type)
+                {
+                    case TypeKind.Lrig:
+                        methodForEachType = new LrigStrategy();
+                        break;
+                    case TypeKind.Arts:
+                        methodForEachType = new ArtsStrategy();
+                        break;
+                    case TypeKind.Signi:
+                        methodForEachType = new SigniStrategy();
+                        break;
+                    case TypeKind.Spell:
+                        methodForEachType = new SpellStrategy();
+                        break;
+                    default:
+                        methodForEachType = new CardStrategy();
+                        break;
+                }
+            }
+        }
 
         public Color Color { get; set; }
         public string Text { get; set; }
-        private byte level;
-        public byte Level
-        {
-            get 
-            { 
-                if (this.Type == card.Type.Arts
-                    || this.Type == card.Type.Spell)
-                {
-                    throw new MissingMemberException("このTypeではLevelを取得できません。"); 
-                }
-                return this.level;
-            }
-            set
-            {
-
-            }
-        }
+        public byte? Level { get; set; }
         public Cost Cost { get; set; }
         public Cost GrowCost { get; set; }
-        public byte Limit { get; set; }
+        public byte? Limit { get; set; }
         public LrigType LrigType { get; set; }
         public LrigType Condition { get; set; }
         public Class Class { get; set; }
-        public int Power { get; set; }
+        public int? Power { get; set; }
 
         public Ability[] Ability { get; set; }
 
@@ -58,121 +71,53 @@ namespace wixosssimulator.components.card
         }
 
         /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
-        public bool IsValid()
+        public bool IsValid() { return methodForEachType.IsValid(this); }
+    }
+
+    interface ITypeStrategy
+    {
+        bool IsValid(Card card);
+    }
+
+    class CardStrategy : ITypeStrategy
+    {
+        public bool IsValid(Card card)
         {
-            
+            if (card.Id == null) { return false; }
+            return true;
+        }
+    }
+
+    class LrigStrategy : ITypeStrategy
+    {
+        public bool IsValid(Card card) 
+        {
+
             return false;
         }
     }
 
-    //public class CardAbstract
-    //{
-    //    private string Id { get; set; }
-    //    private string Kana { get; set; } // 全角カナのみのチェックを行う?
-    //    private string Illust { get; set; }
-    //    private Rarity Rarity { get; set; }
-    //    private string FlevorText { get; set; }
-
-    //    private string Name { get; set; }
-
-    //    private Type Type { get; set; }
-
-    //    private Color Color { get; set; }
-    //    private string Text { get; set; }
-    //    private byte Level { get; set; }
-    //    private Cost Cost { get; set; }
-    //    private Cost GrowCost { get; set; }
-    //    private byte Limit { get; set; }
-    //    private LrigType LrigType { get; set; }
-    //    private LrigType Condition { get; set; }
-    //    private Class Class { get; set; }
-    //    private int Power { get; set; }
-
-    //    private Ability[] Ability { get; set; }
-
-    //    public CardAbstract()
-    //    {
-    //        foreach (PropertyInfo p in this.GetType().GetProperties())
-    //        {
-    //            p.SetValue(this, null);
-    //        }
-    //    }
-
-    //    /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
-    //    public bool IsValid()
-    //    {
-
-    //        return false;
-    //    }
-    //}
-
-    //public class Lrig : Card
-    //{
-    //    public string Id { get; set; }
-    //    public string Kana { get; set; } // 全角カナのみのチェックを行う?
-    //    public string Illust { get; set; }
-    //    public Rarity Rarity { get; set; }
-    //    public string FlevorText { get; set; }
-
-    //    public string Name { get; set; }
-
-    //    public Type Type { get; set; }
-
-    //    public Color Color { get; set; }
-    //    public string Text { get; set; }
-    //    public byte Level { get; set; }
-    //    private Cost Cost { get; set; }
-    //    public Cost GrowCost { get; set; }
-    //    public byte Limit { get; set; }
-    //    public LrigType LrigType { get; set; }
-    //    private LrigType Condition { get; set; }
-    //    private Class Class { get; set; }
-    //    private int Power { get; set; }
-
-    //    public Ability[] Ability { get; set; }
-
-    //    public Lrig()
-    //    {
-    //        foreach (PropertyInfo p in this.GetType().GetProperties())
-    //        {
-    //            p.SetValue(this, null);
-    //        }
-    //    }
-
-    //    /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
-    //    public bool IsValid()
-    //    {
-            
-    //        return false;
-    //    }
-    
-    //}
-
-    public interface ICard
+    class ArtsStrategy : ITypeStrategy
     {
-        string Id { get; set; }
-        string Kana { get; set; } // 全角カナのみのチェックを行う?
-        string Illust { get; set; }
-        Rarity Rarity { get; set; }
-        string FlevorText { get; set; }
+        public bool IsValid(Card card)
+        {
+            return false;
+        }
+    }
 
-        string Name { get; set; }
+    class SigniStrategy : ITypeStrategy
+    {
+        public bool IsValid(Card card)
+        {
+            return false;
+        }
+    }
 
-        Type Type { get; set; }
-
-        Color Color { get; set; }
-        string Text { get; set; }
-        byte Level { get; set; }
-        Cost Cost { get; set; }
-        Cost GrowCost { get; set; }
-        byte Limit { get; set; }
-        LrigType LrigType { get; set; }
-        LrigType Condition { get; set; }
-        Class Class { get; set; }
-        int Power { get; set; }
-
-        Ability[] Ability { get; set; }
-
-        bool IsValid();
+    class SpellStrategy : ITypeStrategy
+    {
+        public bool IsValid(Card card)
+        {
+            return false;
+        }
     }
 }

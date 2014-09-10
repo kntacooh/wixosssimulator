@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 using System.Text.RegularExpressions;
 
-namespace wixosssimulator.test
+namespace WixossSimulator
 {
     public partial class WebForm1 : System.Web.UI.Page
     {
@@ -16,7 +16,7 @@ namespace wixosssimulator.test
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            this.Html = wixosssimulator.components.Stream.GetHtmlDocument("http://www.takaratomy.co.jp/products/wixoss/card/card_detail.php?id=251");
+            this.Html = HtmlStream.GetDocument("http://www.takaratomy.co.jp/products/wixoss/card/card_detail.php?id=251");
             Regex r = new Regex(@"<div class=""card_detail"">(.*)</div>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             Match m = r.Match(Html);

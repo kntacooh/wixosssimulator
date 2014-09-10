@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace wixosssimulator
+namespace WixossSimulator
 {
     public partial class helloworldInherits : System.Web.UI.Page
     {

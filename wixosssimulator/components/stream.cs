@@ -7,14 +7,14 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace wixosssimulator.components
+namespace WixossSimulator
 {
-    public class Stream
+    public class HtmlStream
     {
         /// <summary> HTMLファイルの内容を文字コードを合わせて取得します。 </summary>
         /// <param name="path"> ローカルまたはインターネット上のアドレス。 </param>
         /// <returns></returns>
-        public static string GetHtmlDocument(string path)
+        public static string GetDocument(string path)
         {
             Uri pathUri = new Uri(path);
             if (!(pathUri.IsFile || pathUri.IsAbsoluteUri)) return null;

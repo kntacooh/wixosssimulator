@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace wixosssimulator.components.card
+namespace WixossSimulator.Card
 {
     /// <summary> ルリグタイプについての情報を表します。 </summary>
     public class LrigType

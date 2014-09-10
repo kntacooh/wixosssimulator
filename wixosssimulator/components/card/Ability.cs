@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace wixosssimulator.components.card
+namespace WixossSimulator.Card
 {
-    public class Ability
+    /// <summary> 効果についての情報を表します。 </summary>
+    public class Ability //状態遷移により
     {
+
     }
 }

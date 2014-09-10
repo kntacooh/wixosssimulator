@@ -1,4 +1,4 @@
-﻿using wixosssimulator.components.card;
+﻿using WixossSimulator.Card;
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="helloworld.aspx.cs" Inherits="wixosssimulator.helloworldInherits" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="helloworld.aspx.cs" Inherits="WixossSimulator.helloworldInherits" %>
 
 <!DOCTYPE html>
 
@@ -12,7 +12,7 @@
     <div>
     <% 
         
-        //wixosssimulator.components.card.Card card = new wixosssimulator.components.card.Card();
+        WixossSimulator.Card.Card card = new WixossSimulator.Card.Card();
         //wixosssimulator.components.card.Lrig lrig = new wixosssimulator.components.card.Lrig();
         //wixosssimulator.components.card.ICard cardInterface;
         //cardInterface = lrig;
@@ -21,7 +21,7 @@
         //Response.Write(cardInterface.Condition.Text + "<br>");
         Response.Write("Hello, world!<br>");
 
-        wixosssimulator.components.card.Cost cost;
+        //wixosssimulator.components.card.Cost cost;
     %>
     </div>
     </form>

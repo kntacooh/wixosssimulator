@@ -1,4 +1,4 @@
-﻿using wixosssimulator.components.card;
+﻿using WixossSimulator.Card;
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,30 +10,30 @@ namespace wixosssimulatorTest.components.card
     [TestClass]
     public class CostTest
     {
-        Dictionary<Color, byte> 連想配列_なし = new Dictionary<Color,byte>();
-        Dictionary<Color, byte> 連想配列Full_全0 = new Dictionary<Color, byte>()
+        Dictionary<ColorKind, byte> 連想配列_なし = new Dictionary<ColorKind,byte>();
+        Dictionary<ColorKind, byte> 連想配列Full_全0 = new Dictionary<ColorKind, byte>()
         {
-            {Color.Colorless, 0},
-            {Color.White, 0},
-            {Color.Red, 0},
-            {Color.Blue, 0},
-            {Color.Green, 0},
-            {Color.Black, 0}
+            {ColorKind.Colorless, 0},
+            {ColorKind.White, 0},
+            {ColorKind.Red, 0},
+            {ColorKind.Blue, 0},
+            {ColorKind.Green, 0},
+            {ColorKind.Black, 0}
         };
         byte[] 配列_全0 = { 0, 0, 0, 0, 0, 0 };
-        Dictionary<Color, byte> 連想配列_赤1黒2 = new Dictionary<Color, byte>()
+        Dictionary<ColorKind, byte> 連想配列_赤1黒2 = new Dictionary<ColorKind, byte>()
         {
-            {Color.Black, 2},
-            {Color.Red, 1}
+            {ColorKind.Black, 2},
+            {ColorKind.Red, 1}
         };
-        Dictionary<Color, byte> 連想配列Full_赤1黒2 = new Dictionary<Color, byte>()
+        Dictionary<ColorKind, byte> 連想配列Full_赤1黒2 = new Dictionary<ColorKind, byte>()
         {
-            {Color.Colorless, 0},
-            {Color.White, 0},
-            {Color.Red, 1},
-            {Color.Blue, 0},
-            {Color.Green, 0},
-            {Color.Black, 2}
+            {ColorKind.Colorless, 0},
+            {ColorKind.White, 0},
+            {ColorKind.Red, 1},
+            {ColorKind.Blue, 0},
+            {ColorKind.Green, 0},
+            {ColorKind.Black, 2}
         };
         byte[] 配列_赤1黒2 = { 0, 0, 1, 0, 0, 2 };
 
@@ -49,7 +49,7 @@ namespace wixosssimulatorTest.components.card
         [TestMethod]
         public void Cost_nullを表す連想配列で初期化()
         {
-            Dictionary<Color, byte> 連想配列_null = null;
+            Dictionary<ColorKind, byte> 連想配列_null = null;
             Cost cost = new Cost(連想配列_null);
             CollectionAssert.AreEqual(連想配列Full_全0, cost.Value);
             CollectionAssert.AreEqual(配列_全0, cost.GetArray());

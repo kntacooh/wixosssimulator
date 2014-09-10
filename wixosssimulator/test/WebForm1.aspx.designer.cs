@@ -7,7 +7,7 @@
 // </自動生成>
 //------------------------------------------------------------------------------
 
-namespace wixosssimulator.test {
+namespace WixossSimulator {
     
     
     public partial class WebForm1 {

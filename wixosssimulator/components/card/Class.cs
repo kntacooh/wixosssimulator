@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace wixosssimulator.components.card
+namespace WixossSimulator.Card
 {
-    /// <summary> シグニの持つクラスついての情報を表します。 </summary>
+    /// <summary> シグニの持つクラスについての情報を表します。 </summary>
     public class Class
     {
         private string text;

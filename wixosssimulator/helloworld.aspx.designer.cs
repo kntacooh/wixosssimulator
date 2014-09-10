@@ -7,7 +7,7 @@
 // </自動生成>
 //------------------------------------------------------------------------------
 
-namespace wixosssimulator {
+namespace WixossSimulator {
     
     
     public partial class helloworldInherits {
