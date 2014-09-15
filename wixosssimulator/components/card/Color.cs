@@ -24,7 +24,7 @@ namespace WixossSimulator.Card
     {
         private Dictionary<ColorKind, T> value;
         /// <summary> 連想配列を初期化するときに色ごとの値を指定しない場合の既定値を取得します。 </summary>
-        private T defaultValue = default(T);
+        private T defaultValue;
 
         /// <summary> 色ごとの値を示す連想配列を取得します。 </summary>
         public Dictionary<ColorKind, T> Value
@@ -39,10 +39,7 @@ namespace WixossSimulator.Card
         }
 
         /// <summary> 新しいインスタンスを初期化します。このコンストラクタは派生クラスに継承するときのみ使用されます。 </summary>
-        protected ValueForEachColor()
-        {
-            InitializeValue();
-        }
+        protected ValueForEachColor() : this(default(T)) { }
         /// <summary> 既定値を設定して、新しいインスタンスを初期化します。このコンストラクタは派生クラスに継承するときのみ使用されます。 </summary>
         /// <param name="defaultValue"> 色ごとの値を指定しない場合の既定値。 </param>
         protected ValueForEachColor(T defaultValue)
@@ -52,36 +49,18 @@ namespace WixossSimulator.Card
         }
         /// <summary> 色ごとの値を示す連想配列を指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="value"> 色ごとの値を示す連想配列。 </param>
-        protected ValueForEachColor(Dictionary<ColorKind, T> value)
-        {
-            InitializeValue();
-            this.Value = value;
-        }
+        protected ValueForEachColor(Dictionary<ColorKind, T> value) : this(value, default(T)) { }
         /// <summary> 既定値を設定して、色ごとの値を示す連想配列を指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="value"> 色ごとの値を示す連想配列。 </param>
         /// <param name="defaultValue"> 色ごとの値を指定しない場合の既定値。 </param>
-        protected ValueForEachColor(Dictionary<ColorKind, T> value, T defaultValue)
-        {
-            this.defaultValue = defaultValue;
-            InitializeValue();
-            this.Value = value;
-        }
+        protected ValueForEachColor(Dictionary<ColorKind, T> value, T defaultValue) : this(defaultValue) { this.Value = value; }
         /// <summary> 色ごとの値を示す配列を指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="value"> 色ごとの値を表す配列。 </param>
-        protected ValueForEachColor(T[] value)
-        {
-            InitializeValue();
-            SetArray(value);
-        }
+        protected ValueForEachColor(T[] value) : this(value, default(T)) { }
         /// <summary> 既定値を設定して、色ごとの値を示す配列を指定して新しいインスタンスを初期化します。 </summary>
         /// <param name="value"> 色ごとの値を表す配列。 </param>
         /// <param name="defaultValue"> 色ごとの値を指定しない場合の既定値。 </param>
-        protected ValueForEachColor(T[] value, T defaultValue)
-        {
-            this.defaultValue = defaultValue;
-            InitializeValue();
-            SetArray(value);
-        }
+        protected ValueForEachColor(T[] value, T defaultValue) : this(defaultValue) { SetArray(value); }
 
         /// <summary> 色ごとの値を配列として取得します。 </summary>
         /// <returns> 色ごとの値を示す配列。 </returns>

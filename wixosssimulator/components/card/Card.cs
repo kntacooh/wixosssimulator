@@ -17,7 +17,7 @@ namespace WixossSimulator.Card
         public string Id { get; set; }
         public string Kana { get; set; } // 全角カナのみのチェックを行う?
         public string Illust { get; set; }
-        public RarityKind Rarity { get; set; }
+        public Rarity Rarity { get; set; }
         public string FlevorText { get; set; }
 
         public string Name { get; set; }
