@@ -8,6 +8,7 @@ namespace wixosssimulatorTest.components.card
     [TestClass]
     public class ClassTest
     {
+        #region 変数
         string なし = "";
         string 空白のみ = "  　 　  ";
         string 精元 = "精元";
@@ -18,6 +19,7 @@ namespace wixosssimulatorTest.components.card
         string 精像 = "精像";
         string 天使 = "天使";
         string 天使_第１分類なしのテキスト = "：天使";
+        #endregion
 
         [TestMethod]
         public void Class_テキストから初期化_なし()

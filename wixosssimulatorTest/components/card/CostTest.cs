@@ -10,6 +10,7 @@ namespace wixosssimulatorTest.components.card
     [TestClass]
     public class CostTest
     {
+        #region 変数
         Dictionary<ColorKind, byte> 連想配列_なし = new Dictionary<ColorKind,byte>();
         Dictionary<ColorKind, byte> 連想配列Full_全0 = new Dictionary<ColorKind, byte>()
         {
@@ -43,8 +44,7 @@ namespace wixosssimulatorTest.components.card
         //※下限が0以外の1次元配列は作れないのだろうか? (以下のコードはエラー)
         //byte[] 配列_要素過剰 = (byte[])Array.CreateInstance(typeof(byte), new int[] { 15 }, new int[] { 0 });
         //byte[] 配列_要素不足 = (byte[])Array.CreateInstance(typeof(byte), new int[] { 6 }, new int[] { 3 });
-
-
+        #endregion
 
         [TestMethod]
         public void Cost_nullを表す連想配列で初期化()
@@ -66,7 +66,6 @@ namespace wixosssimulatorTest.components.card
         [TestMethod]
         public void Cost_配列で初期化_全0()
         {
-            System.Diagnostics.Debugger.Break();
             Cost cost = new Cost(配列_全0);
             CollectionAssert.AreEqual(連想配列Full_全0, cost.Value);
             CollectionAssert.AreEqual(配列_全0, cost.GetArray());

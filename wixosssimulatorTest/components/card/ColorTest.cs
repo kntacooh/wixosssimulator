@@ -10,6 +10,7 @@ namespace wixosssimulatorTest.components.card
     [TestClass]
     public class ColorTest
     {
+        #region 変数
         Dictionary<ColorKind, bool> 連想配列_なし = new Dictionary<ColorKind, bool>();
         Dictionary<ColorKind, bool> 連想配列Full_false = new Dictionary<ColorKind, bool>()
         {
@@ -57,7 +58,7 @@ namespace wixosssimulatorTest.components.card
         //※下限がfalse以外の1次元配列は作れないのだろうか? (以下のコードはエラー)
         //bool[] 配列_要素過剰 = (bool[])Array.CreateInstance(typeof(bool), new int[] { 15 }, new int[] { 0 });
         //bool[] 配列_要素不足 = (bool[])Array.CreateInstance(typeof(bool), new int[] { 6 }, new int[] { 3 });
-
+        #endregion
 
         [TestMethod]
         public void Color_nullを表す連想配列で初期化()

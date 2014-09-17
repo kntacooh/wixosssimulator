@@ -8,6 +8,7 @@ namespace wixosssimulatorTest.components.card
     [TestClass]
     public class LrigTypeTest
     {
+        #region 変数
         string 文字列_なし = "";
         string[] 配列_なし = { };
         string 文字列_空白のみ = "  　  ";
@@ -21,6 +22,7 @@ namespace wixosssimulatorTest.components.card
         string[] 配列_花代とユヅキ_空白とnull要素含む
             = { "  ", "", "花代", "", "     ", "　　　　　　", " ", "ユヅキ", "     ", null, "　　　　", "　　 　  　", null };
         string[] 配列_花代とユヅキ_前後空白含む = { " 花代　　", "　 　ユヅキ 　" };
+        #endregion
 
         [TestMethod]
         public void LrigType_文字列で初期化_なし()
