@@ -12,6 +12,7 @@ namespace WixossSimulator.Card
     public class Rarity
     {
         #region RarityKindに対応する各種連想配列
+        // Rarityクラスには含めるべきでない情報??
         /// <summary> キーをレアリティを示す文字列、値を対応する列挙値とする、読み取り専用の連想配列を取得します。 </summary>
         private static ReadOnlyDictionary<string, RarityKind> Text = new ReadOnlyDictionary<string, RarityKind>(
             new Dictionary<string, RarityKind>(new IgnoreVariousTypeComparer()/*StringComparer.InvariantCultureIgnoreCase*/)
