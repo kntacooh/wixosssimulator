@@ -55,6 +55,7 @@
     <Compile Include="components\card\CostTest.cs" />
     <Compile Include="components\card\LrigTypeTest.cs" />
     <Compile Include="components\card\RarityTest.cs" />
+    <Compile Include="components\crawler\WebCrawlerTest.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

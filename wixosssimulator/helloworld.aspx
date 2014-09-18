@@ -12,16 +12,8 @@
     <div>
     <% 
         
-        WixossSimulator.Card.Card card = new WixossSimulator.Card.Card();
-        //wixosssimulator.components.card.Lrig lrig = new wixosssimulator.components.card.Lrig();
-        //wixosssimulator.components.card.ICard cardInterface;
-        //cardInterface = lrig;
-        //cardInterface.Condition = new wixosssimulator.components.card.LrigType("タマ");
-        //lrig.Condition = new wixosssimulator.components.card.LrigType("タマ");
-        //Response.Write(cardInterface.Condition.Text + "<br>");
         Response.Write("Hello, world!<br>");
 
-        //wixosssimulator.components.card.Cost cost;
     %>
     </div>
     </form>

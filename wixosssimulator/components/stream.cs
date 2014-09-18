@@ -11,14 +11,21 @@ namespace WixossSimulator
 {
     public class HtmlStream
     {
-        /// <summary> HTMLファイルの内容を文字コードを合わせて取得します。 </summary>
-        /// <param name="path"> ローカルまたはインターネット上のアドレス。 </param>
-        /// <returns></returns>
+        /// <summary> HTMLドキュメントの内容を文字コードを合わせて取得します。 </summary>
+        /// <param name="path"> ローカルまたはインターネット上のアドレスを表す絶対パス。 </param>
+        /// <returns> HTMLドキュメント。 </returns>
         public static string GetDocument(string path)
         {
-            Uri pathUri = new Uri(path);
-            if (!(pathUri.IsFile || pathUri.IsAbsoluteUri)) return null;
-            string address = pathUri.AbsoluteUri;
+            Uri uri = new Uri(path);
+            return GetDocument(uri);
+        }
+        /// <summary> HTMLドキュメントの内容を文字コードを合わせて取得します。 </summary>
+        /// <param name="uri"> ローカルまたはインターネット上のアドレスを表すURIクラスのインスタンス。 </param>
+        /// <returns> HTMLドキュメント。 </returns>
+        public static string GetDocument(Uri uri)
+        {
+            if (!(uri.IsFile || uri.IsAbsoluteUri)) { throw new NotImplementedException(); }
+            string address = uri.AbsoluteUri;
 
             try
             {

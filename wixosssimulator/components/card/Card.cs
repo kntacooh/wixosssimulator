@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-using System.Reflection;
+using System.Reflection; //リフレクション
 
 namespace WixossSimulator.Card
 {
@@ -12,7 +12,7 @@ namespace WixossSimulator.Card
     {
         private TypeKind type;
         /// <summary> カードの種類に応じて呼び出されるメソッドを取得します。 </summary>
-        private ITypeStrategy methodForEachType;
+        private ITypeStrategy TypeStrategy;
 
         public string Id { get; set; }
         public string Kana { get; set; } // 全角カナのみのチェックを行う?
@@ -31,19 +31,19 @@ namespace WixossSimulator.Card
                 switch (this.Type)
                 {
                     case TypeKind.Lrig:
-                        methodForEachType = new LrigStrategy();
+                        TypeStrategy = new LrigStrategy();
                         break;
                     case TypeKind.Arts:
-                        methodForEachType = new ArtsStrategy();
+                        TypeStrategy = new ArtsStrategy();
                         break;
                     case TypeKind.Signi:
-                        methodForEachType = new SigniStrategy();
+                        TypeStrategy = new SigniStrategy();
                         break;
                     case TypeKind.Spell:
-                        methodForEachType = new SpellStrategy();
+                        TypeStrategy = new SpellStrategy();
                         break;
                     default:
-                        methodForEachType = new CardStrategy();
+                        TypeStrategy = new CardStrategy();
                         break;
                 }
             }
@@ -71,7 +71,7 @@ namespace WixossSimulator.Card
         }
 
         /// <summary> このオブジェクトがカードとして有効なものかどうか </summary>
-        public bool IsValid() { return methodForEachType.IsValid(this); }
+        public bool IsValid() { return TypeStrategy.IsValid(this); }
     }
 
     interface ITypeStrategy
