@@ -10,27 +10,27 @@ namespace WixossSimulator.Crawler
 {
     public class WebCrawler
     {
-        private CrawledDomain crawledDomain;
+        private CrawledDomainAttribute crawledDomainAttribute;
         //ドメインごとの動作を規定するストラテジー
-        private ICrawledDomainStrategy crawledDomainStrategy = new CrawledDomainStrategy();
+        private IDomainStrategy domainStrategy = new DomainStrategy();
 
         /// <summary> スクレイピングを行うサイトのドメインを示す列挙値を取得します。 </summary>
-        public CrawledDomain CrawledDomain
+        public CrawledDomainAttribute CrawledDomainAttribute
         {
-            get { return this.crawledDomain; }
+            get { return this.crawledDomainAttribute; }
             set
             {
-                this.crawledDomain = value;
-                switch (this.crawledDomain)
+                this.crawledDomainAttribute = value;
+                switch (this.crawledDomainAttribute)
                 {
-                    case WixossSimulator.Crawler.CrawledDomain.Official:
-                        crawledDomainStrategy = new OfficialStrategy();
+                    case WixossSimulator.Crawler.CrawledDomainAttribute.Official:
+                        domainStrategy = new OfficialStrategy();
                         break;
-                    case WixossSimulator.Crawler.CrawledDomain.Wiki:
-                        crawledDomainStrategy = new WikiStrategy();
+                    case WixossSimulator.Crawler.CrawledDomainAttribute.Wiki:
+                        domainStrategy = new WikiStrategy();
                         break;
                     default:
-                        crawledDomainStrategy = new CrawledDomainStrategy();
+                        domainStrategy = new DomainStrategy();
                         break;
                 }
             }
@@ -41,30 +41,30 @@ namespace WixossSimulator.Crawler
         //public WebCrawler() { }
         /// <summary> スクレイピングを行うサイトのドメインを示す列挙値を指定して、新しいインスタンスを初期化します。 </summary>
         /// <param name="domain"> スクレイピングを行うサイトのドメインを示す列挙値。 </param>
-        public WebCrawler(CrawledDomain domain)
+        public WebCrawler(CrawledDomainAttribute domain)
         {
-            this.CrawledDomain = domain;
+            this.CrawledDomainAttribute = domain;
         }
 
         //そのドメインに存在する全てのカード情報をURLに追加
-        public void SearchAllCardResource() 
+        public void SearchAllUrls() 
         {
-            foreach (string url in crawledDomainStrategy.SearchAllUrls())
+            foreach (string url in domainStrategy.SearchAllUrls())
             {
                 this.Urls.Add(url);
             }
         }
 
         //HTMLドキュメントの中のカードの情報部分を取得する
-        private string GetHtmlCardInformation(string url) { return crawledDomainStrategy.GetHtmlCardInformation(url); }
+        private string GetHtmlCardInformation(string url) { return domainStrategy.GetHtmlCardInformation(url); }
         //Cardクラスの型に一致するように変換する
-        private Card.Card ConvertToCard(string html) { return crawledDomainStrategy.ConvertToCard(html); }
+        private Card.Card ConvertToCard(string html) { return domainStrategy.ConvertToCard(html); }
 
 
     }
 
     /// <summary> スクレイピングを行うサイトのドメインを示す列挙値を提供します。 </summary>
-    public enum CrawledDomain
+    public enum CrawledDomainAttribute
     {
         /// <summary> 不明。 </summary>
         Unknown,
@@ -74,7 +74,7 @@ namespace WixossSimulator.Crawler
         Wiki,
     }
 
-    public interface ICrawledDomainStrategy
+    public interface IDomainStrategy
     {
         //ドメインを示すURL
         string Url { get; }
@@ -88,7 +88,7 @@ namespace WixossSimulator.Crawler
         Card.Card ConvertToCard(string html);
     }
 
-    public class CrawledDomainStrategy : ICrawledDomainStrategy
+    public class DomainStrategy : IDomainStrategy
     {
         public string Url { get { return "http://"; } }
 
@@ -108,11 +108,11 @@ namespace WixossSimulator.Crawler
         }
     }
 
-    public class OfficialStrategy : ICrawledDomainStrategy
+    public class OfficialStrategy : IDomainStrategy
     {
         public string Url { get { return "http://www.takaratomy.co.jp/"; } }
 
-        List<string> ICrawledDomainStrategy.SearchAllUrls()
+        List<string> IDomainStrategy.SearchAllUrls()
         {
             List<string> results = new List<string>();
             Regex regexCardUrl = new Regex(@"href\s*=\s*""(?<relativePath>.*?)""",
@@ -149,32 +149,32 @@ namespace WixossSimulator.Crawler
             return results;
         }
 
-        string ICrawledDomainStrategy.GetHtmlCardInformation(string url)
+        string IDomainStrategy.GetHtmlCardInformation(string url)
         {
             throw new NotImplementedException();
         }
 
-        Card.Card ICrawledDomainStrategy.ConvertToCard(string html)
+        Card.Card IDomainStrategy.ConvertToCard(string html)
         {
             throw new NotImplementedException();
         }
     }
 
-    public class WikiStrategy : ICrawledDomainStrategy
+    public class WikiStrategy : IDomainStrategy
     {
         public string Url { get { return "http://wixoss.81.la/"; } }
 
-        List<string> ICrawledDomainStrategy.SearchAllUrls()
+        List<string> IDomainStrategy.SearchAllUrls()
         {
             throw new NotImplementedException();
         }
 
-        string ICrawledDomainStrategy.GetHtmlCardInformation(string url)
+        string IDomainStrategy.GetHtmlCardInformation(string url)
         {
             throw new NotImplementedException();
         }
 
-        Card.Card ICrawledDomainStrategy.ConvertToCard(string html)
+        Card.Card IDomainStrategy.ConvertToCard(string html)
         {
             throw new NotImplementedException();
         }

@@ -31,24 +31,20 @@ namespace WixossSimulator
             {
                 // 仮にHTMLドキュメントを取得
                 WebClient client = new WebClient();
+                client.Encoding = Encoding.UTF8;
                 string tempDocument = client.DownloadString(address);
 
                 // charsetを検索
-                Regex r = new System.Text.RegularExpressions.Regex(@"<head>.*?charset=(?<charset>.*?)[\s"";].*?</head>",
+                Regex r = new System.Text.RegularExpressions.Regex(@"<head>.*?charset=""?(?<charset>.*?)[\s"";].*?</head>",
                     RegexOptions.IgnoreCase | RegexOptions.Singleline);
                 Match m = r.Match(tempDocument);
-
                 if (m.Success)
                 {
                     try { client.Encoding = Encoding.GetEncoding(m.Groups["charset"].Value); }
                     catch { client.Encoding = Encoding.UTF8; }
                 }
-                else
-                {
-                    client.Encoding = Encoding.UTF8;
-                }
-                // HTMLテキスト…？を取得
-                return client.DownloadString(address);
+                if (client.Encoding == Encoding.UTF8) { return tempDocument; }
+                else { return client.DownloadString(address); }
             }
             catch
             {

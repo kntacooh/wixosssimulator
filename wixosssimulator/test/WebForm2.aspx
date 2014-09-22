@@ -22,7 +22,7 @@
             <%
                 WebCrawler crawler = new WebCrawler(CrawledDomain.Official);
                 //crawler.Urls.Add("http://example.com/");
-                crawler.SearchAllCardResource();
+                crawler.SearchAllUrls();
 
                 foreach (string url in crawler.Urls)
                 {
