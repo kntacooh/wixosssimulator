@@ -1,5 +1,5 @@
 ﻿$(function () {
-    var connection = $.hubConnection();
+    var connection = $.hubConnection('/wixosssimulator/signalr', { useDefaultPath: false });
     var searching = connection.createHubProxy("searching");
     var viewModel = {
 
@@ -51,7 +51,7 @@
         viewModel.urls.push(url);
     });
 
-    connection.start(function () {
+    connection.start().done(function () {
         searching.invoke("GetDomainList");
         viewModel.started(true);
     });
