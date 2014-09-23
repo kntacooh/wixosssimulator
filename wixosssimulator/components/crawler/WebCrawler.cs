@@ -56,7 +56,7 @@ namespace WixossSimulator.Crawler
         }
 
         //HTMLドキュメントの中のカードの情報部分を取得する
-        private string GetHtmlCardInformation(string url) { return domainStrategy.GetHtmlCardInformation(url); }
+        private string GetHtmlCardInformation(string url) { return domainStrategy.GetHtmlCardContent(url); }
         //Cardクラスの型に一致するように変換する
         private Card.Card ConvertToCard(string html) { return domainStrategy.ConvertToCard(html); }
 
@@ -83,7 +83,7 @@ namespace WixossSimulator.Crawler
         //そのドメインに存在する全てのカード情報を検索する
         List<string> SearchAllUrls();
         //HTMLドキュメントの中のカードの情報部分を取得する
-        string GetHtmlCardInformation(string url);
+        string GetHtmlCardContent(string url);
         //Cardクラスの型に一致するように変換する
         Card.Card ConvertToCard(string html);
     }
@@ -97,7 +97,7 @@ namespace WixossSimulator.Crawler
             throw new NotImplementedException();
         }
 
-        public string GetHtmlCardInformation(string url)
+        public string GetHtmlCardContent(string url)
         {
             throw new NotImplementedException();
         }
@@ -149,7 +149,7 @@ namespace WixossSimulator.Crawler
             return results;
         }
 
-        string IDomainStrategy.GetHtmlCardInformation(string url)
+        string IDomainStrategy.GetHtmlCardContent(string url)
         {
             throw new NotImplementedException();
         }
@@ -169,7 +169,7 @@ namespace WixossSimulator.Crawler
             throw new NotImplementedException();
         }
 
-        string IDomainStrategy.GetHtmlCardInformation(string url)
+        string IDomainStrategy.GetHtmlCardContent(string url)
         {
             throw new NotImplementedException();
         }

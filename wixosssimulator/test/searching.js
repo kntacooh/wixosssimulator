@@ -43,6 +43,7 @@
             viewModel.items.push("hello, " + viewModel.counter() + "回目");
         }
     });
+
     searching.on("SetDomainName", function (domain) {
         viewModel.domainList.push(domain);
     });
