@@ -1,5 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="WebForm2.aspx.cs" Inherits="WixossSimulator.test.WebForm2" %>
-<%@ Import Namespace="WixossSimulator.Crawler" %>
+<%@ Import Namespace="WixossSimulator.Crawling" %>
 
 <!DOCTYPE html>
 
@@ -20,7 +20,7 @@
     <div>
         <ol>
             <%
-                WebCrawler crawler = new WebCrawler(CrawledDomain.Official);
+                Crawler crawler = new Crawler(CrawledDomainAttribute.Official);
                 //crawler.Urls.Add("http://example.com/");
                 crawler.SearchAllUrls();
 

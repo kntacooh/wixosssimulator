@@ -29,7 +29,7 @@
         },
         hello: function () {
             searching.invoke("Hello");
-        },
+        }
 
     };
 
@@ -57,6 +57,3 @@
         viewModel.started(true);
     });
 });
-
-
-

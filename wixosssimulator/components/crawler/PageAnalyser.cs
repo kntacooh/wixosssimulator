@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace WixossSimulator.Crawler
+namespace WixossSimulator.Crawling
 {
     public class PageAnalyser
     {

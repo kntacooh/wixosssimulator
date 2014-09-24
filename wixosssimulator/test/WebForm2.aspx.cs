@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-using WixossSimulator.Crawler;
+using WixossSimulator.Crawling;
 
 namespace WixossSimulator.test
 {

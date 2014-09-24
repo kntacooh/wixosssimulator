@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace WixossSimulator
 {
+    /// <summary> HTMLドキュメントのストリーム操作を行うための静的メソッドを提供します。 </summary>
     public class HtmlStream
     {
         /// <summary> HTMLドキュメントの内容を文字コードを合わせて取得します。 </summary>
@@ -27,10 +28,8 @@ namespace WixossSimulator
             if (!(uri.IsFile || uri.IsAbsoluteUri)) { throw new NotImplementedException(); }
             string address = uri.AbsoluteUri;
 
-            try
+            using (WebClient client = new WebClient())
             {
-                // 仮にHTMLドキュメントを取得
-                WebClient client = new WebClient();
                 client.Encoding = Encoding.UTF8;
                 string tempDocument = client.DownloadString(address);
 
@@ -45,11 +44,7 @@ namespace WixossSimulator
                 }
                 if (client.Encoding == Encoding.UTF8) { return tempDocument; }
                 else { return client.DownloadString(address); }
-            }
-            catch
-            {
-                //どこかで失敗した場合はそのまま例外を投げる
-                throw;
+
             }
         }
     }

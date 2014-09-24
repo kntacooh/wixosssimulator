@@ -5,7 +5,7 @@ using System.Web;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 
-using WixossSimulator.Crawler;
+using WixossSimulator.Crawling;
 using System.Threading.Tasks; //Task
 
 namespace WixossSimulator.test
@@ -25,12 +25,9 @@ namespace WixossSimulator.test
 
         public void GetUrls(string domain)
         {
-            CrawledDomainAttribute crawledDomainAttribute = 
-                (CrawledDomainAttribute)Enum.Parse(typeof(CrawledDomainAttribute), domain);
-
-            WebCrawler webCrawler = new WebCrawler(crawledDomainAttribute);
-            webCrawler.SearchAllUrls();
-            foreach (string url in webCrawler.Urls)
+            Crawler webCrawler = new Crawler();
+            webCrawler.SearchAllDomainId(domain);
+            foreach (string url in webCrawler.DomainId)
             {
                 Clients.All.SetUrl(url);
             }
