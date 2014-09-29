@@ -90,7 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
-    <Content Include="src\pub025_common.css" />
+    <Content Include="src\pub025fixed_common.css" />
     <Content Include="src\crawler.js" />
     <Content Include="wixoss\crawling.html" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
@@ -117,14 +117,15 @@
     <Content Include="test\searching.html" />
     <Content Include="test\searching.js" />
     <Content Include="test\WebForm1.aspx" />
-    <Content Include="test\WebForm2.aspx" />
     <Content Include="test\EchoAndFirstSignalR.aspx" />
     <Content Include="test\HelloName.aspx" />
     <Content Include="Web.config" />
     <Content Include="test\helloworld.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="components\CardOfMySql.cs" />
+    <Compile Include="components\sql\CrawlingData.cs" />
+    <Compile Include="components\sql\TableData.cs" />
+    <Compile Include="components\sql\WixossCardDatabase.cs" />
     <Compile Include="components\card\Ability.cs" />
     <Compile Include="components\card\Class.cs" />
     <Compile Include="components\card\Cost.cs" />
@@ -161,13 +162,6 @@
     </Compile>
     <Compile Include="test\WebForm1.aspx.designer.cs">
       <DependentUpon>WebForm1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="test\WebForm2.aspx.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="test\WebForm2.aspx.designer.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
     </Compile>
     <Compile Include="test\EchoAndFirstSignalR.aspx.cs">
       <DependentUpon>EchoAndFirstSignalR.aspx</DependentUpon>

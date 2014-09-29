@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Crawlingのテスト</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
-    <link rel="stylesheet" href="../src/pub025_common.css">
+    <link rel="stylesheet" href="../src/pub025fixed_common.css">
 </head>
 <body>
     <div data-bind="visible: !started()"><p>読み込み中です……</p></div>
@@ -16,8 +16,8 @@
 
         <p>
             MySQL設定<br />
-            UserID: zeta00s_<input data-bind="value: userId" />
-            Password:<input type="password" data-bind="value: password" />
+            UserID: <input data-bind="value: userId" />
+            Password: <input type="password" data-bind="value: password" />
         </p>
 
         <hr />
@@ -26,9 +26,9 @@
             カード情報の探索をします。<br />
             スクレイピングを行うサイトのドメインを指定して探索開始ボタンを押しましょう。<br />
             (今のところ、 Official …公式サイトからのスクレイピングのみ対応)<br />
-            <select data-bind="options: domainAttribute, value: domain"></select>
-            <button data-bind="click: startSearch">MySQLから読込</button>
-            <button data-bind="click: startSearch">探索開始</button><br />
+            <select data-bind="options: domainAttribute, value: domain, enable: !isSearch() && !isLoadCrawlingTable(), event: {change: loadCrawlingTable}"></select>
+            <button data-bind="click: startSearching, enable: !isSearch() && (domain() != 'Unknown')">探索開始</button>
+            <button data-bind="click: startUpdating, enable: enableToUpdate">SQLを更新</button><br />
         </p>
 
         <hr />
@@ -47,24 +47,24 @@
             <thead>
                 <tr>
                     <td>ID</td>
-                    <td>更新日時</td>
-                    <td>確認日時</td>
-                    <td></td>
+                    <!--<td>URL</td>-->
+                    <td width="180">更新日時</td>
+                    <td width="180">確認日時</td>
+                    <!--<td width="24"></td>
+                    <td width="24"></td>-->
                 </tr>
             </thead>
-            <tbody>
+            <tbody data-bind="foreach: crawlingTable">
                 <tr>
-                    <td data-bind=""></td>
-                    <td data-bind=""></td>
-                    <td data-bind=""></td>
-                    <td data-bind=""></td>
+                    <!--<td data-bind="text: domainId"></td>-->
+                    <td><a target="_blank" data-bind="attr: { href: url }"><span style="color: #008000" data-bind="text: domainId"></span></a></td>
+                    <td align="center" data-bind="text: lastUpdated"></td>
+                    <td align="center" data-bind="text: lastConfirmed"></td>
+                    <!--<td align="center"><span data-bind="visible: isExistInSql">○</span></td>
+                    <td align="center"><span data-bind="visible: isCrawled">○</span></td>-->
                 </tr>
             </tbody>
         </table>
-        <!--<p>
-            domainId: <input data-bind="value: domainId" /><br />
-            URLは <span data-bind="text: url"></span> です。<br />
-        </p>-->
 
         <!--<p>
             結果：<br />

@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 
 /* ========BASIC======== */
 html {
@@ -116,7 +116,7 @@ dd {
 }
 
 table {
-    width:600px;
+    width:100%;
     margin:10px 0;
     border-collapse:collapse;
     border:1px solid #999;

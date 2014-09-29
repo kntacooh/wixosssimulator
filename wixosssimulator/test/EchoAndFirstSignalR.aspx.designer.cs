@@ -10,7 +10,7 @@
 namespace WixossSimulator.test {
     
     
-    public partial class WebForm2 {
+    public partial class WebForm3 {
         
         /// <summary>
         /// form1 コントロール。

@@ -17,7 +17,7 @@ namespace WixossSimulator.test
 
         public void GetDomainList() 
         {
-            foreach (string s in Enum.GetNames(typeof(CrawledDomainAttribute)))
+            foreach (string s in Enum.GetNames(typeof(DomainAttribute)))
             {
                 Clients.All.SetDomainName(s);
             }
@@ -26,11 +26,10 @@ namespace WixossSimulator.test
         public void GetUrls(string domain)
         {
             Crawler webCrawler = new Crawler();
-            webCrawler.SearchAllDomainId(domain);
-            foreach (string url in webCrawler.DomainId)
-            {
-                Clients.All.SetUrl(url);
-            }
+            //foreach (string url in webCrawler.SearchAllDomainId2(domain))
+            //{
+            //    Clients.All.SetUrl(url);
+            //}
         }
 
 
