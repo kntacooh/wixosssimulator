@@ -25,22 +25,22 @@
                 vm.crawlingTable.removeAll();
 
                 vm.isLoadCrawlingTable(true);
-                crawler.invoke("GetCrawlingTable", vm.userId(), vm.password(), vm.domain());
+                crawler.invoke("SearchAllDomainId", vm.userId(), vm.password(), vm.domain());
             },
 
 
-            isSearch: ko.observable(false),
-            startSearching: function () {
-                vm.isSearch(true);
+            //isSearch: ko.observable(false),
+            //startSearching: function () {
+            //    vm.isSearch(true);
 
-                vm.isLoadCrawlingTable(true);
-                var a = ko.toJSON(vm.crawlingTable());
-                //crawler.invoke("GetCrawlingTable", vm.userId(), vm.password(), vm.domain());
-                crawler.invoke("SearchAllDomainId", vm.domain(), ko.toJSON(vm.crawlingTable()));
-                //crawler.invoke("UpdateCrawlingTable", vm.userId(), vm.password(), vm.domain(), ko.toJSON(vm.crawlingTable()));
-                //vm.isSearch(false);
-                //crawler.invoke("SearchAllDomainId2", vm.domain(), a);
-            },
+            //    vm.isLoadCrawlingTable(true);
+            //    var a = ko.toJSON(vm.crawlingTable());
+            //    //crawler.invoke("GetCrawlingTable", vm.userId(), vm.password(), vm.domain());
+            //    crawler.invoke("SearchAllDomainId", vm.domain(), ko.toJSON(vm.crawlingTable()));
+            //    //crawler.invoke("UpdateCrawlingTable", vm.userId(), vm.password(), vm.domain(), ko.toJSON(vm.crawlingTable()));
+            //    //vm.isSearch(false);
+            //    //crawler.invoke("SearchAllDomainId2", vm.domain(), a);
+            //},
 
             enableToUpdate: ko.observable(false),
             startUpdating: function () {
@@ -61,26 +61,39 @@
         self.lastUpdated = ko.observable(data.lastUpdated);
         self.lastConfirmed = ko.observable(data.lastConfirmed);
         self.deleted = ko.observable(data.deleted);
+        self.bgColor = ko.computed(function () {
+            if (self.deleted()) { return "#F5F5F5"; }
+
+            if (vm.enableToUpdate()) {
+                if (self.lastUpdated()) { return "#FFFFE0"; }
+                return "#FFEBCD";
+            }
+
+            if (self.lastUpdated() == self.lastConfirmed()) {
+                return "#F0FFF0";
+            }
+            return "#F0FFFF";
+        });
     }
 
     ko.applyBindings(vm);
 
-    crawler.on("EndSearching", function (domain) {
-        vm.isSearch(false);
-        vm.enableToUpdate(true);
-    });
-
     crawler.on("SetDomainAttribute", function (domain) {
         vm.domainAttribute.push(domain);
     });
+
     crawler.on("SetCrawlingTable", function (crawlingTable) {
-        vm.crawlingTable($.map(JSON.parse(crawlingTable), function (data, i) {
+        vm.crawlingTable($.map(JSON.parse(crawlingTable), function (data) {
             return new CrawlingData(data);
         }));
+        //vm.crawlingTable.push(new CrawlingData({}));
         vm.isLoadCrawlingTable(false);
         vm.enableToUpdate(false);
-        //vm.crawlingTable.push(new CrawlingData({}));
     });
+    crawler.on("EndSearching", function (domain) {
+        vm.enableToUpdate(true);
+    });
+
     crawler.on("SetProgressPrimary", function (value, message) {
         vm.progressPrimary(value);
         vm.progressPrimaryMessage(message);
@@ -89,15 +102,6 @@
         vm.progressSecondary(value);
         vm.progressSecondaryMessage(message);
     });
-    //crawler.on("SetUrl", function (url, domainId) {
-    //    for (var i = 0; i < vm.crawlingTable().length; i++) {
-    //        if (vm.crawlingTable()[i].domainId() == domainId) {
-    //            //var a = "<a target=\"_blank\" href=\"" + url + "\">" + url + "</a>";
-    //            vm.crawlingTable()[i].url(url);
-    //            return;
-    //        }
-    //    }
-    //});
 
 
 

@@ -64,10 +64,10 @@ namespace WixossSimulator.Crawling
         protected class FixedCrawlingData
         {
             [JsonProperty("domainId")]
-            public string DomainId { get; /*private*/ set; }
+            public string DomainId { get; set; }
             [JsonProperty("url")]
-            public string Url { get; /*private*/ set; }
-            public string Content { get; set; }
+            public string Url { get; set; }
+            //public string Content { get; set; }
             [JsonProperty("lastUpdated")]
             public DateTime? LastUpdated { get; set; }
             [JsonProperty("lastConfirmed")]
@@ -179,7 +179,7 @@ namespace WixossSimulator.Crawling
                 }
 
                 using (SqlCommand command = new SqlCommand(
-                    "SELECT DomainId, Content, LastUpdated, LastConfirmed, Deleted FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "'",
+                    "SELECT DomainId, LastUpdated, LastConfirmed, Deleted FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "'",
                     connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -196,10 +196,9 @@ namespace WixossSimulator.Crawling
                             FixedCrawlingData crawlingData = new FixedCrawlingData();
                             crawlingData.DomainId = reader.GetString(0);
                             crawlingData.Url = domainStrategy.ConvertDomainIdToUrl(crawlingData.DomainId);
-                            crawlingData.Content = reader.GetString(1);
-                            crawlingData.LastUpdated = reader.GetDateTime(2);
-                            crawlingData.LastConfirmed = reader.GetDateTime(3);
-                            crawlingData.Deleted = reader.GetValue(4) as DateTime?;
+                            crawlingData.LastUpdated = reader.GetDateTime(1);
+                            crawlingData.LastConfirmed = reader.GetDateTime(2);
+                            crawlingData.Deleted = reader.GetValue(3) as DateTime?;
                             fixedCrawlingTable.Add(crawlingData);
                         }
                     }
@@ -226,10 +225,8 @@ namespace WixossSimulator.Crawling
             List<FixedCrawlingData> fixedCrawlingTable = GetCrawlingTable(userId, password);
 
 
-            Clients.Caller.SetProgressPrimary(0, "カード情報の探索を開始します。");
+            Clients.Caller.SetProgressPrimary((double)1 / 2, "ドメイン内からカード情報を探索します。");
             Clients.Caller.SetProgressSecondary(0, "");
-
-            //DateTime confirmed = DateTime.Now;
 
             foreach (string domainId in domainStrategy.SearchAllDomainId(this))
             {
@@ -249,6 +246,7 @@ namespace WixossSimulator.Crawling
             Clients.Caller.EndSearching();
         }
 
+        //改修前
         /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと合体させて??クライアントに返します。 </summary>
         /// <param name="domain"> ドメインを示す文字列。 </param>
         /// <param name="fixedCrawlingTableJson"> JavaScriptのcrawlingTableを表すJSON。 </param>
@@ -286,7 +284,7 @@ namespace WixossSimulator.Crawling
         //SQLを更新して結果をクライアントに返す
         public void UpdateCrawlingTable(string userId, string password, string domain, string fixedCrawlingTableJson)
         {
-            Clients.Caller.SetProgressPrimary(0, "SQLの更新を開始します。");
+            Clients.Caller.SetProgressPrimary(0, "データベースの更新を開始します。");
             Clients.Caller.SetProgressSecondary(0, "");
 
             DomainAttribute = ConvertToCrawledDomainAttribute(domain);
@@ -296,7 +294,7 @@ namespace WixossSimulator.Crawling
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                Clients.Caller.SetProgressSecondary(0, "SQLとの接続を開いています。");
+                Clients.Caller.SetProgressSecondary(0, "データベースとの接続を開いています。");
                 connection.Open();
 
                 List<FixedCrawlingData> fixedCrawlingTable = JsonConvert.DeserializeObject<List<FixedCrawlingData>>(fixedCrawlingTableJson);
@@ -304,57 +302,64 @@ namespace WixossSimulator.Crawling
                 {
                     counter++;
                     Clients.Caller.SetProgressPrimary((double)(counter - 1) / fixedCrawlingTable.Count, counter + "件目を更新中です。");
-                    Clients.Caller.SetProgressSecondary(0, "クエリ文を作成しています。");
 
                     //削除されたデータは更新しない
                     if (fixedCrawlingData.Deleted.HasValue) { continue; }
 
+                    string tableContent = null;
+                    string currentContent = null;
 
-                    //現在のカード情報を取得
+                    Clients.Caller.SetProgressSecondary(0, "テーブル内のカード情報を取得しています。");
+                    using (SqlCommand command = new SqlCommand(
+                        "SELECT Content FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "' And DomainId = N'" + fixedCrawlingData.DomainId + "'",
+                        connection))
+                    {
+                        tableContent = command.ExecuteScalar() as string; //NULLチェック
+                        //ただし CreateQuery メソッド内で１回使われるのみ
+                    }
+
+                    Clients.Caller.SetProgressSecondary((double)1 / 4, "ドメイン内のカード情報を取得しています。");
                     DateTime timeAcquired = DateTime.Now;
-                    string currentContent;
                     try { currentContent = domainStrategy.GetCurrentContent(fixedCrawlingData.DomainId); }
                     catch { currentContent = null; }
 
-                    //StringBuilder query = new StringBuilder();
-                    //query.Append(CreateQuery(fixedCrawlingData, currentContent, timeAcquired));
-                    string query = CreateQuery(fixedCrawlingData, currentContent, timeAcquired);
+                    Clients.Caller.SetProgressSecondary((double)2 / 4, "クエリ文を作成しています。");
+                    string query = CreateQuery(fixedCrawlingData, tableContent, currentContent, timeAcquired);
                     if (string.IsNullOrEmpty(query)) { continue; }
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        Clients.Caller.SetProgressSecondary(0.5, "クエリを発行しています");
+                        Clients.Caller.SetProgressSecondary((double)3 / 4, "クエリを発行しています");
                         command.ExecuteNonQuery();
                         //command.ExecuteNonQueryAsync();
                     }
 
                     Clients.Caller.SetProgressSecondary(1, "クエリを発行しました。");
-
                 }
 
-                Clients.Caller.SetProgressSecondary(1, "SQLとの接続を閉じています。");
+                Clients.Caller.SetProgressSecondary(1, "データベースとの接続を閉じています。");
                 connection.Close();
             }
 
-            Clients.Caller.SetProgressPrimary(1, "SQLの更新が完了しました。");
-            Clients.Caller.SetProgressSecondary(1, "");
+            Clients.Caller.SetCrawlingTable(JsonConvert.SerializeObject(GetCrawlingTable(userId, password)));
 
-            GetCrawlingTable(userId, password, domain);
+            Clients.Caller.SetProgressPrimary(1, "データベースの更新が完了しました。");
+            Clients.Caller.SetProgressSecondary(1, "");
         }
 
-        /// <summary> <c>fixedCrawlingData</c> と現在のカード情報から、SQLに発行するクエリを取得します。 </summary>
+        /// <summary> <c>fixedCrawlingData</c> とテーブル内、ドメイン内それぞれのカード情報から、SQL Server に発行するクエリを取得します。 </summary>
         /// <param name="fixedCrawlingData"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
         /// <param name="currentContent"> 現在のカード情報を示す文字列。 </param>
         /// <param name="timeAcquired"> 現在のカード情報を取得した時刻。 </param>
-        /// <returns> SQLに発行するクエリ。 </returns>
-        private string CreateQuery(FixedCrawlingData fixedCrawlingData, string currentContent, DateTime timeAcquired)
+        /// <returns> SQL Server に発行するクエリ。 </returns>
+        private string CreateQuery(FixedCrawlingData fixedCrawlingData, string tableContent, string currentContent, DateTime timeAcquired)
         {
             StringBuilder query = new StringBuilder();
 
-            //SQLにまだ存在しないデータの場合
+            //テーブル内にまだ存在しないデータの場合
             if (!fixedCrawlingData.LastUpdated.HasValue)
             {
-                //SQLに存在せず、カード情報が取得できない場合(リンク切れなどが考えられる??)はクエリを発行しない
+                //データベースに存在せず、カード情報が取得できない場合(リンク切れなどが考えられる??)はクエリを発行しない
                 if (string.IsNullOrWhiteSpace(currentContent)) { return null; }
                 //カード情報を取得できた場合はデータを挿入するクエリを発行
                 query.Append("INSERT INTO Crawling ( Domain, DomainId, Content, LastUpdated, LastConfirmed )");
@@ -362,16 +367,16 @@ namespace WixossSimulator.Crawling
                 query.Append(" N'").Append(DomainAttribute.ToString()).Append("'");
                 query.Append(", N'").Append(fixedCrawlingData.DomainId).Append("'");
                 query.Append(", N'").Append(currentContent).Append("'");
-                query.Append(", '").Append(timeAcquired/*.ToString("O")*/).Append("'");
+                query.Append(", '").Append(timeAcquired).Append("'");
                 query.Append(", '").Append(timeAcquired).Append("'");
                 query.Append(")");
                 return query.ToString();
             }
 
-            //以下、SQLに既に存在するデータの場合
+            //以下、データベースに既に存在するデータの場合
             query.Append("UPDATE Crawling");
 
-            //SQLに存在しているが、現在のカード情報が取得できなくなっている場合
+            //現在のカード情報がドメイン上から取得できなくなっている場合
             if (string.IsNullOrWhiteSpace(currentContent))
             {
                 query.Append(" SET Deleted = '").Append(timeAcquired).Append("'");
@@ -379,8 +384,8 @@ namespace WixossSimulator.Crawling
                 return query.ToString();
             }
 
-            //SQLに存在しているが、現在のカード情報と一致しない＝更新されている場合
-            if (currentContent != fixedCrawlingData.Content)
+            //現在のカード情報とデータベースの情報が一致しない＝更新されている場合
+            if (currentContent != tableContent)
             {
                 query.Append(" SET Content = N'").Append(currentContent).Append("'");
                 query.Append(", LastUpdated = '").Append(timeAcquired).Append("'");
@@ -389,15 +394,15 @@ namespace WixossSimulator.Crawling
                 return query.ToString();
             }
 
-            //SQLに存在しているが、現在のカード情報と一致＝更新されていない場合
+            //現在のカード情報とデータベースの情報が一致する＝更新されていない場合
             query.Append(" SET LastConfirmed = '").Append(timeAcquired).Append("'");
             query.Append(CreateQueryWhere(fixedCrawlingData));
             return query.ToString();
         }
 
-        /// <summary> <c>fixedCrawlingData</c> から、SQLに発行するクエリの検索条件を取得します。 </summary>
+        /// <summary> <c>fixedCrawlingData</c> から、SQL Server に発行するクエリの検索条件を取得します。 </summary>
         /// <param name="fixedCrawlingData"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
-        /// <returns> SQLに発行するクエリの検索条件。 </returns>
+        /// <returns> SQL Server に発行するクエリの検索条件。 </returns>
         private string CreateQueryWhere(FixedCrawlingData fixedCrawlingData)
         {
             StringBuilder query = new StringBuilder(" WHERE Deleted IS NULL");
@@ -484,7 +489,7 @@ namespace WixossSimulator.Crawling
             Regex regexCardUrl = new Regex(@"href\s*=\s*""(?<relativePath>.*?)""",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            crawler.Clients.Caller.SetProgressPrimary(0, "カードの検索結果を取得中です。");
+            crawler.Clients.Caller.SetProgressSecondary(0, "カードの検索結果を取得中です。");
 
             Uri uriBase = new Uri(Url + "products/wixoss/card/card_list.php");
             string htmlPageUrl = HtmlStream.GetDocument(uriBase);
@@ -563,7 +568,7 @@ namespace WixossSimulator.Crawling
             Regex regexCardUrl = new Regex(@"<a[^>]*href=""(?<absolutePath>http://wixoss.81.la/\?%A1%D4.*?)""[^>]*?>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-            crawler.Clients.Caller.SetProgressPrimary(0, "ページリストを取得中です。");
+            crawler.Clients.Caller.SetProgressSecondary(0, "ページリストを取得中です。");
 
             Uri uriBase = new Uri(Url + "?cmd=list");
             string htmlCardUrl = HtmlStream.GetDocument(uriBase);
@@ -610,8 +615,11 @@ namespace WixossSimulator.Crawling
         public string GetCurrentContent(string domainId)
         {
             string content = HtmlStream.GetDocument(ConvertDomainIdToUrl(domainId));
-            return Regex.Match(content, @"<td valign=""top"">(.*)</td>",
+            content = Regex.Match(content, @"<td valign=""top"">(.*)</td>",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline).Groups[1].Value;
+            return Regex.Replace(content, @"(<a[^>]*title=""[^""]*) \(.*?\)(""[^>]*>.*?</a>)", "$1$2",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
         }
     }
 }

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Crawlingのテスト</title>
+    <title>DB管理画面(かもしれない)</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
     <link rel="stylesheet" href="../src/pub025fixed_common.css">
 </head>
@@ -10,7 +10,7 @@
     <div data-bind="visible: !started()"><p>読み込み中です……</p></div>
     <div data-bind="visible: started">
 
-        <h2>カード情報の探索</h2>
+        <h2>データベースに含まれるカード情報の管理</h2>
 
         <hr />
 
@@ -23,26 +23,44 @@
         <hr />
 
         <p>
-            カード情報の探索をします。<br />
-            スクレイピングを行うサイトのドメインを指定して探索開始ボタンを押しましょう。<br />
-            (今のところ、 Official …公式サイトからのスクレイピングのみ対応)<br />
-            ドメイン: <select data-bind="options: domainAttribute, value: domain, enable: !isSearch() && !isLoadCrawlingTable(), event: {change: loadCrawlingTable}"></select>
-            <button data-bind="click: startSearching, enable: !isSearch() && (domain() != 'Unknown')">探索開始</button>
-            <button data-bind="click: startUpdating, enable: enableToUpdate">SQLを更新</button><br />
+            以降、適当な説明……
+            指定したドメイン内に含まれるカード情報の管理をします。<br />
+            ドメインを選択すると、まず、自分のデータベースに問い合わせて、その時点で存在するデータを結果テーブルに取得します。
+            その後、ドメイン内に存在する全てのカード情報を表すURLを探索して、存在するデータを結果テーブルに追加します。<br />
+            「DB更新」ボタンを押すことでデータベースを更新することができます。<br />
+            ドメイン: <select data-bind="options: domainAttribute, value: domain, enable: !isLoadCrawlingTable(), event: {change: loadCrawlingTable}"></select>
+            <!--<button data-bind="click: startSearching, enable: domain() != 'Unknown'">探索開始</button>-->
+            <button data-bind="click: startUpdating, enable: enableToUpdate">DB更新</button><br />
         </p>
 
         <hr />
 
         <p>
-            <progress max="1" data-bind="value: progressPrimary"></progress>
-            <span data-bind="text: progressPrimaryMessage"></span><br />
-            <progress max="1" data-bind="value: progressSecondary"></progress>
-            <span data-bind="text: progressSecondaryMessage"></span><br />
-
+            結果テーブルの背景色はそれぞれ、
+            <span style="background-color: #F5F5F5">灰色：ドメイン内から取得できないため更新を行わないデータ</span>、
+            <span style="background-color: #FFEBCD">オレンジ色：データベースに追加される予定のデータ</span>、
+            <span style="background-color: #FFFFE0">黄色：情報が更新されている時のみデータベースに反映される予定のデータ</span>、
+            <span style="background-color: #F0FFF0">緑色：データベースに追加、または更新を行ったデータ</span>、
+            <span style="background-color: #F0FFFF">青色：更新の必要がなかったデータ</span>
+            を表します。
         </p>
 
         <hr />
 
+        <p>
+            進捗状況: <br />
+            <progress max="1" data-bind="value: progressPrimary"></progress>
+            <span data-bind="text: progressPrimaryMessage"></span><br />
+            <progress max="1" data-bind="value: progressSecondary"></progress>
+            <span data-bind="text: progressSecondaryMessage"></span><br />
+        </p>
+
+        <hr />
+
+        <p data-bind="visible: crawlingTable().length > 0">
+            <span data-bind="text: crawlingTable().length"></span>件のデータが表示されています。
+        </p>
+        結果テーブル:
         <table>
             <thead>
                 <tr>
@@ -56,9 +74,9 @@
                 </tr>
             </thead>
             <tbody data-bind="foreach: crawlingTable">
-                <tr>
+                <tr data-bind="attr: { bgcolor: bgColor }">
                     <!--<td data-bind="text: domainId"></td>-->
-                    <td><a target="_blank" data-bind="attr: { href: url }"><span style="color: #008000" data-bind="text: domainId"></span></a></td>
+                    <td><a target="_blank" data-bind="attr: { href: url }"><span style="color: #4800ff" data-bind="text: domainId"></span></a></td>
                     <td align="center" data-bind="text: lastUpdated"></td>
                     <td align="center" data-bind="text: lastConfirmed"></td>
                     <td align="center" data-bind="text: deleted"></td>
