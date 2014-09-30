@@ -28,28 +28,9 @@
                 crawler.invoke("SearchAllDomainId", vm.userId(), vm.password(), vm.domain());
             },
 
-
-            //isSearch: ko.observable(false),
-            //startSearching: function () {
-            //    vm.isSearch(true);
-
-            //    vm.isLoadCrawlingTable(true);
-            //    var a = ko.toJSON(vm.crawlingTable());
-            //    //crawler.invoke("GetCrawlingTable", vm.userId(), vm.password(), vm.domain());
-            //    crawler.invoke("SearchAllDomainId", vm.domain(), ko.toJSON(vm.crawlingTable()));
-            //    //crawler.invoke("UpdateCrawlingTable", vm.userId(), vm.password(), vm.domain(), ko.toJSON(vm.crawlingTable()));
-            //    //vm.isSearch(false);
-            //    //crawler.invoke("SearchAllDomainId2", vm.domain(), a);
-            //},
-
             enableToUpdate: ko.observable(false),
             startUpdating: function () {
                 crawler.invoke("UpdateCrawlingTable", vm.userId(), vm.password(), vm.domain(), ko.toJSON(vm.crawlingTable()));
-                //for (var i = 0; i < vm.crawlingTable().length; i++) {
-                //    var sqlJsonData = ko.toJSON(vm.crawlingTable()[i]);
-                //    crawler.invoke("UpdateSql", vm.userId(), vm.password(), vm.domain(), sqlJsonData);
-                //}
-
             }
 
         };

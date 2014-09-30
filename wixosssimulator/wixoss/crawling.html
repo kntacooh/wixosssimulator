@@ -29,7 +29,6 @@
             その後、ドメイン内に存在する全てのカード情報を表すURLを探索して、存在するデータを結果テーブルに追加します。<br />
             「DB更新」ボタンを押すことでデータベースを更新することができます。<br />
             ドメイン: <select data-bind="options: domainAttribute, value: domain, enable: !isLoadCrawlingTable(), event: {change: loadCrawlingTable}"></select>
-            <!--<button data-bind="click: startSearching, enable: domain() != 'Unknown'">探索開始</button>-->
             <button data-bind="click: startUpdating, enable: enableToUpdate">DB更新</button><br />
         </p>
 
@@ -65,36 +64,20 @@
             <thead>
                 <tr>
                     <td>ID</td>
-                    <!--<td>URL</td>-->
                     <td width="180">最終更新日時</td>
                     <td width="180">最終確認日時</td>
                     <td width="180">削除日時</td>
-                    <!--<td width="24"></td>
-                    <td width="24"></td>-->
                 </tr>
             </thead>
             <tbody data-bind="foreach: crawlingTable">
                 <tr data-bind="attr: { bgcolor: bgColor }">
-                    <!--<td data-bind="text: domainId"></td>-->
                     <td><a target="_blank" data-bind="attr: { href: url }"><span style="color: #4800ff" data-bind="text: domainId"></span></a></td>
                     <td align="center" data-bind="text: lastUpdated"></td>
                     <td align="center" data-bind="text: lastConfirmed"></td>
                     <td align="center" data-bind="text: deleted"></td>
-                    <!--<td align="center"><span data-bind="visible: isExistInSql">○</span></td>
-                    <td align="center"><span data-bind="visible: isCrawled">○</span></td>-->
                 </tr>
             </tbody>
         </table>
-
-        <!--<p>
-            結果：<br />
-            <span data-bind="visible: urls().length > 0"><span data-bind="text: urls().length"></span>件ヒットしました。</span><br />
-            <span data-bind="visible: isSearch">探索中。しばらくお待ちください……(数十秒ほどかかるだろうか)</span><br />
-
-            <ol data-bind="foreach: urls, visible: urls().length > 0">
-                <li data-bind="text: $data"></li>
-            </ol>
-        </p>-->
 
     </div>
 

@@ -91,72 +91,6 @@ namespace WixossSimulator.Crawling
             }
         }
 
-        //改修前
-        /// <summary> Crawlingテーブルの中で、ドメインが一致するデータを全て取り出してクライアントに返します。 </summary>
-        /// <param name="userId"> 接続で使用するユーザーのID。 </param>
-        /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
-        /// <param name="domain"> ドメインを示す文字列。 </param>
-        public void GetCrawlingTable(string userId, string password, string domain)
-        {
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(password)) { return; }
-
-            Clients.Caller.SetProgressPrimary(0, "データベースからドメインが一致するデータを検索します。");
-            Clients.Caller.SetProgressSecondary(0, "");
-
-            DomainAttribute = ConvertToCrawledDomainAttribute(domain);
-
-            string connectionString = WixossCardDatabase.CreateConnectionString(userId, password);
-            string query = "SELECT DomainId, LastUpdated, LastConfirmed, Deleted FROM Crawling WHERE Domain = N'" + domain + "'";
-            //List<CrawlingData> crawlingTable = new List<CrawlingData>();
-            List<FixedCrawlingData> fixedCrawlingTable = new List<FixedCrawlingData>();
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                Clients.Caller.SetProgressSecondary(0, "データベースとの接続を開いています。");
-                connection.Open();
-
-                int numOfItems = 0;
-                using (SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM Crawling WHERE Domain = N'" + domain + "'", connection))
-                {
-                    numOfItems = int.Parse(command.ExecuteScalar().ToString());
-                }
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        int counter = 0;
-
-                        while (reader.Read())
-                        {
-                            counter++;
-                            Clients.Caller.SetProgressSecondary(
-                                (double)(counter - 1) / numOfItems,
-                                numOfItems + "件のデータを検出しました。" + counter + "件目のデータを取り込んでいます。");
-
-                            //crawlingTable.Add(new CrawlingData(reader));
-                            FixedCrawlingData crawlingData = new FixedCrawlingData();
-                            //crawlingData.SetDomainIdWithUrl(reader.GetString(0), this);
-                            crawlingData.DomainId = reader.GetString(0);
-                            crawlingData.Url = domainStrategy.ConvertDomainIdToUrl(crawlingData.DomainId);
-                            //crawlingData.Content = reader.GetString(1);
-                            crawlingData.LastUpdated = reader.GetDateTime(1);
-                            crawlingData.LastConfirmed = reader.GetDateTime(2);
-                            crawlingData.Deleted = reader.GetValue(3) as DateTime?;
-                            fixedCrawlingTable.Add(crawlingData);
-                        }
-                    }
-                }
-                Clients.Caller.SetCrawlingTable(JsonConvert.SerializeObject(fixedCrawlingTable));
-                Clients.Caller.SetProgressSecondary(1, "データベースとの接続を閉じています。");
-                connection.Close();
-            }
-
-            Clients.Caller.SetProgressPrimary(1, "データベースからドメインが一致するデータを取得しました。");
-            Clients.Caller.SetProgressSecondary(1, "");
-        }
-
-        //改修後
         /// <summary> Crawlingテーブルの中で、ドメインが一致するデータを全て取得します。 </summary>
         /// <param name="userId"> 接続で使用するユーザーのID。 </param>
         /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
@@ -211,8 +145,7 @@ namespace WixossSimulator.Crawling
             return fixedCrawlingTable;
         }
 
-        //改修後
-        /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと結合させてクライアントに返します。 </summary>
+        /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと結合させて、そのテーブルをクライアントに返します。 </summary>
         /// <param name="userId"> 接続で使用するユーザーのID。 </param>
         /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
         /// <param name="domain"> ドメインを示す文字列。 </param>
@@ -246,42 +179,11 @@ namespace WixossSimulator.Crawling
             Clients.Caller.EndSearching();
         }
 
-        //改修前
-        /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと合体させて??クライアントに返します。 </summary>
+        /// <summary> クライアントのテーブルを基にデータベースを更新して、更新されたCrawlingテーブルをクライアントに返します。 </summary>
+        /// <param name="userId"> 接続で使用するユーザーのID。 </param>
+        /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
         /// <param name="domain"> ドメインを示す文字列。 </param>
-        /// <param name="fixedCrawlingTableJson"> JavaScriptのcrawlingTableを表すJSON。 </param>
-        public void SearchAllDomainId(string domain, string fixedCrawlingTableJson)
-        {
-
-
-            Clients.Caller.SetProgressPrimary(0, "カード情報の探索を開始します。");
-            Clients.Caller.SetProgressSecondary(0, "");
-
-            DomainAttribute = (DomainAttribute)Enum.Parse(typeof(DomainAttribute), domain);
-
-            //DateTime confirmed = DateTime.Now;
-            List<FixedCrawlingData> fixedCrawlingTable = JsonConvert.DeserializeObject<List<FixedCrawlingData>>(fixedCrawlingTableJson);
-
-            foreach (string domainId in domainStrategy.SearchAllDomainId(this))
-            {
-                if (!fixedCrawlingTable.Any(f => f.DomainId == domainId))
-                {
-                    FixedCrawlingData fixedCrawlingData = new FixedCrawlingData();
-                    fixedCrawlingData.DomainId = domainId;
-                    fixedCrawlingData.Url = domainStrategy.ConvertDomainIdToUrl(domainId);
-                    fixedCrawlingTable.Add(fixedCrawlingData);
-                }
-            }
-
-            Clients.Caller.SetProgressPrimary(1, "カード情報の探索が完了しました。");
-            Clients.Caller.SetProgressSecondary(1, "");
-
-            Clients.Caller.SetCrawlingTable(JsonConvert.SerializeObject(fixedCrawlingTable));
-            Clients.Caller.EndSearching();
-        }
-
-
-        //SQLを更新して結果をクライアントに返す
+        /// <param name="fixedCrawlingTableJson"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
         public void UpdateCrawlingTable(string userId, string password, string domain, string fixedCrawlingTableJson)
         {
             Clients.Caller.SetProgressPrimary(0, "データベースの更新を開始します。");
