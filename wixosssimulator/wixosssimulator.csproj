@@ -38,6 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DropNet">
+      <HintPath>..\packages\DropNet.1.9.6\lib\net40\DropNet.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Client">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.1.2\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
     </Reference>
@@ -61,15 +64,15 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data">
-      <HintPath>..\packages\MySql.Data.6.9.3\lib\net45\MySql.Data.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -93,6 +96,7 @@
     <Content Include="src\pub025fixed_common.css" />
     <Content Include="src\crawler.js" />
     <Content Include="wixoss\crawling.html" />
+    <Content Include="wixoss\test0001.html" />
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
@@ -124,6 +128,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="components\sql\CrawlingData.cs" />
+    <Compile Include="components\SugarSync\AccessTokenResource.cs" />
+    <Compile Include="components\SugarSync\Enum.cs" />
+    <Compile Include="components\SugarSync\SugarSyncApiWrapper.cs" />
     <Compile Include="components\sql\TableData.cs" />
     <Compile Include="components\sql\WixossCardDatabase.cs" />
     <Compile Include="components\card\Ability.cs" />
@@ -136,6 +143,13 @@
     <Compile Include="components\crawler\PageAnalyser.cs" />
     <Compile Include="components\crawler\Crawler.cs" />
     <Compile Include="components\Stream.cs" />
+    <Compile Include="components\SugarSync\FileResource.cs" />
+    <Compile Include="components\SugarSync\FolderResource.cs" />
+    <Compile Include="components\SugarSync\FoldersCollectionResource.cs" />
+    <Compile Include="components\SugarSync\UserResource.cs" />
+    <Compile Include="components\SugarSync\WorkspaceResource.cs" />
+    <Compile Include="components\SugarSync\WorkspacesCollectionResource.cs" />
+    <Compile Include="components\SugarSync\XmlResource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="test\helloworld.aspx.cs">
       <DependentUpon>helloworld.aspx</DependentUpon>

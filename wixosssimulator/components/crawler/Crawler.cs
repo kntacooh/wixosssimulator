@@ -7,7 +7,6 @@ using System.Web;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 
-//using System.Collections.ObjectModel; //ReadOnlyDictionary
 using System.Text; //StringBuilder
 using System.Text.RegularExpressions; //正規表現
 
@@ -17,12 +16,13 @@ using Newtonsoft.Json;
 //using System.Data; //DataTable
 
 using WixossSimulator.Sql;
+using WixossSimulator.SugarSync;
 //using WixossSimulator.Card;
 
 namespace WixossSimulator.Crawling
 {
     /// <summary> スクレイピングを行うサイトのドメインを示す列挙値を提供します。 </summary>
-    public enum DomainAttribute
+    public enum DomainKind
     {
         /// <summary> 不明。 </summary>
         Unknown,
@@ -32,35 +32,99 @@ namespace WixossSimulator.Crawling
         Wiki,
     }
 
+    /// <summary> ドメインを表す列挙値と、その種類に応じて行う処理を提供します。 </summary>
+    public class DomainAttribute
+    {
+        private DomainKind value;
+        private IDomainStrategy domainStrategy;
+
+        /// <summary> ドメインを示す列挙値を取得します。 </summary>
+        public DomainKind Value
+        {
+            get { return this.value; }
+            set
+            {
+                this.value = value;
+                switch (this.value)
+                {
+                    case DomainKind.Official:
+                        domainStrategy = new OfficialDomainStrategy();
+                        break;
+                    case DomainKind.Wiki:
+                        domainStrategy = new WikiDomainStrategy();
+                        break;
+                    default:
+                        domainStrategy = new UnknownDomainStrategy();
+                        break;
+                }
+            }
+        }
+        /// <summary> ドメインを示す文字列を取得します。 </summary>
+        public string Text
+        {
+            get { return this.Value.ToString(); }
+        }
+
+        /// <summary> ドメインを示す列挙値を指定して、新しいインスタンスを初期化します。 </summary>
+        /// <param name="domainKind"> ドメインを示す列挙値。 </param>
+        public DomainAttribute(DomainKind domainKind) { this.Value = domainKind; }
+        /// <summary> ドメインを示す文字列を指定して、新しいインスタンスを初期化します。 </summary>
+        /// <param name="domainKind"> ドメインを示す文字列。 </param>
+        public DomainAttribute(string domain) { this.Value = (DomainKind)Enum.Parse(typeof(DomainKind), domain); }
+
+        /// <summary> そのドメインに存在するカード情報を識別する一意の <c>DomainId</c> の一覧を取得します。 </summary>
+        /// <param name="crawler"> 進捗状況をクライアントに返すためのハブを示すクラス。 </param>
+        /// <returns> カード情報を識別する一意の <c>DomainId</c> の一覧。 </returns>
+        public HashSet<string> SearchAllDomainId(Crawler crawler) { return domainStrategy.SearchAllDomainId(crawler); }
+        /// <summary> カード情報を識別する <c>DomainId</c> を、カード情報のアドレスを示すURLに変換します。 </summary>
+        /// <param name="domainId"> カード情報を識別する <c>DomainId</c>。 </param>
+        /// <returns> カード情報のアドレスを示すURL。 </returns>
+        public string ToUrl(string domainId) { return domainStrategy.ConvertDomainIdToUrl(domainId); }
+        /// <summary> カード情報のアドレスを示すURLを、カード情報を識別する <c>DomainId</c> に変換します。 </summary>
+        /// <param name="url"> カード情報のアドレスを示すURL。 </param>
+        /// <returns> カード情報を識別する <c>DomainId</c>。 </returns>
+        public string ToDomainId(string url) { return domainStrategy.ConvertUrlToDomainId(url); }
+        /// <summary> 現在のカード情報を取得します。 </summary>
+        /// <param name="domainId"> カード情報を識別する <c>DomainId</c>。 </param>
+        /// <returns> 現在のカード情報を示す文字列。 </returns>
+        public string GetCurrentContent(string domainId) { return domainStrategy.GetCurrentContent(domainId); }
+    }
+
     [HubName("crawler")]
     public class Crawler : Hub
     {
-        private DomainAttribute domainAttribute = DomainAttribute.Unknown;
+        protected DomainAttribute domainAttribute;
+
+        [Obsolete]
+        private DomainKind domainAttributeOld = DomainKind.Unknown;
         /// <summary> ドメインの種類に応じて呼び出されるメソッドを取得します。CrawledDomainAttribute に応じて自動的に設定されます。 </summary>
-        protected IDomainStrategy domainStrategy = new UnknownStrategy();
+        [Obsolete]
+        protected IDomainStrategy domainStrategyOld = new UnknownDomainStrategy();
         /// <summary> ドメインを示す列挙値を取得します。 </summary>
-        public DomainAttribute DomainAttribute
+        [Obsolete]
+        public DomainKind DomainAttributeOld
         {
-            get { return this.domainAttribute; }
+            get { return this.domainAttributeOld; }
             set
             {
-                this.domainAttribute = value;
-                switch (this.domainAttribute)
+                this.domainAttributeOld = value;
+                switch (this.domainAttributeOld)
                 {
-                    case DomainAttribute.Official:
-                        domainStrategy = new OfficialStrategy();
+                    case DomainKind.Official:
+                        domainStrategyOld = new OfficialDomainStrategy();
                         break;
-                    case DomainAttribute.Wiki:
-                        domainStrategy = new WikiStrategy();
+                    case DomainKind.Wiki:
+                        domainStrategyOld = new WikiDomainStrategy();
                         break;
                     default:
-                        domainStrategy = new UnknownStrategy();
+                        domainStrategyOld = new UnknownDomainStrategy();
                         break;
                 }
             }
         }
 
         /// <summary> Crawlingテーブルのデータをクライアント側のJavaScriptのフォーマットに従って保持します。 </summary>
+        [Obsolete]
         protected class FixedCrawlingData
         {
             [JsonProperty("domainId")]
@@ -82,10 +146,47 @@ namespace WixossSimulator.Crawling
             //}
         }
 
+        public void Testing()
+        {
+            SugarsyncApiWrapper s = new SugarsyncApiWrapper();
+            if (!s.CreateAccessToken()) { Clients.Caller.SetProgressPrimary(1, "アクセストークンを取得できませんでした。"); }
+            //s.Authorization = "";
+            //s.Expiration = DateTime.Parse("2014/10/14 1:15:04");
+            long userId = 0;
+            string folder = ":sc:0:000";
+
+            string result = "";
+            var result01 = s.RetrieveUserInformation(userId + 50);
+            result += "----- 1. " + result01.BodyString;
+            //var result02 = s.RetrieveSyncFoldersCollection(userId);
+            //result += "----- 2. " + result02.BodyString;
+            //var result03 = s.RetrieveFolders(folder);
+            //result += "----- 3. " + result03.BodyString;
+            //var result04 = s.RetrieveFolderInformation(folder);
+            //result += "----- 4. " + result04.BodyString;
+            var result05 = s.RetrieveFolderContents(folder, RetrievingFolderType.None, 5, 10);
+            result += "----- 5. " + result05.BodyString;
+            Clients.Caller.SetProgressPrimary(1, result);
+        }
+
+        public void Testing2()
+        {
+            string content = @"日本語テストコンテンツ
+a
+
+aa
+
+aaa
+改行込み";
+            string postData = "mode=write&id=2&content=" + HttpUtility.UrlEncode(content);
+            string result = HtmlStream.GetDocumentByPosting(postData, "http://zeta00s.php.xdomain.jp/wixoss/content-handler.php");
+            Clients.Caller.SetProgressPrimary(1, result);
+        }
+
         /// <summary> <c>CrawlerDomainAttribute</c> を示す文字列の一覧をクライアントに返します。 </summary>
         public void GetDomainList()
         {
-            foreach (string s in Enum.GetNames(typeof(DomainAttribute)))
+            foreach (string s in Enum.GetNames(typeof(DomainKind)))
             {
                 Clients.Caller.SetDomainAttribute(s);
             }
@@ -95,6 +196,7 @@ namespace WixossSimulator.Crawling
         /// <param name="userId"> 接続で使用するユーザーのID。 </param>
         /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
         /// <returns>Crawlingテーブルの中で、ドメインが一致するデータのリスト。 </returns>
+        [Obsolete]
         private List<FixedCrawlingData> GetCrawlingTable(string userId, string password)
         {
             List<FixedCrawlingData> fixedCrawlingTable = new List<FixedCrawlingData>();
@@ -106,14 +208,14 @@ namespace WixossSimulator.Crawling
 
                 int numOfItems = 0;
                 using (SqlCommand command = new SqlCommand(
-                    "SELECT COUNT(*) FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "'",
+                    "SELECT COUNT(*) FROM Crawling WHERE Domain = N'" + DomainAttributeOld.ToString() + "'",
                     connection))
                 {
                     numOfItems = int.Parse(command.ExecuteScalar().ToString());
                 }
 
                 using (SqlCommand command = new SqlCommand(
-                    "SELECT DomainId, LastUpdated, LastConfirmed, Deleted FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "'",
+                    "SELECT DomainId, LastUpdated, LastConfirmed, Deleted FROM Crawling WHERE Domain = N'" + DomainAttributeOld.ToString() + "'",
                     connection))
                 {
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -129,7 +231,7 @@ namespace WixossSimulator.Crawling
 
                             FixedCrawlingData crawlingData = new FixedCrawlingData();
                             crawlingData.DomainId = reader.GetString(0);
-                            crawlingData.Url = domainStrategy.ConvertDomainIdToUrl(crawlingData.DomainId);
+                            crawlingData.Url = domainStrategyOld.ConvertDomainIdToUrl(crawlingData.DomainId);
                             crawlingData.LastUpdated = reader.GetDateTime(1);
                             crawlingData.LastConfirmed = reader.GetDateTime(2);
                             crawlingData.Deleted = reader.GetValue(3) as DateTime?;
@@ -145,13 +247,63 @@ namespace WixossSimulator.Crawling
             return fixedCrawlingTable;
         }
 
+        /// <summary> Crawlingテーブルの中で、ドメインが一致するデータを全て取得します。 </summary>
+        /// <returns>Crawlingテーブルの中で、ドメインが一致するデータのリスト。 </returns>
+        private List<CrawlingData> GetCrawlingTable()
+        {
+            string query = "SELECT id, domain, domainId, lastUpdated, lastConfirmed, deleted FROM crawling WHERE domain = '" + domainAttribute.Text + "'";
+            //string query = "SELECT * FROM crawling WHERE domain = '" + domainAttribute.Text + "'";
+            //string postData = "query=" + HttpUtility.UrlEncode(query);
+
+            Clients.Caller.SetProgressSecondary(0, "クエリを実行しています。");
+            string json = HtmlStream.GetDocumentByPosting("query=" + HttpUtility.UrlEncode(query), "http://zeta00s.php.xdomain.jp/mysql/query.php");
+
+            List<CrawlingData> crawlingTable = JsonConvert.DeserializeObject<List<CrawlingData>>(json);
+            
+            Clients.Caller.SetProgressSecondary(1, "クエリを実行しました。");
+            return crawlingTable ?? new List<CrawlingData>(0);
+        }
+
+        /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと結合させて、そのテーブルをクライアントに返します。 </summary>
+        /// <param name="domain"> ドメインを示す文字列。 </param>
+        public void SearchAllDomainId(string domain)
+        {
+            domainAttribute = new DomainAttribute(domain);
+
+            Clients.Caller.SetProgressPrimary(0, "データベースからドメインが一致するデータを検索します。");
+            Clients.Caller.SetProgressSecondary(0, "");
+            List<CrawlingData> crawlingTable = GetCrawlingTable();
+
+
+            Clients.Caller.SetProgressPrimary((double)1 / 2, "ドメイン内からカード情報を探索します。");
+            Clients.Caller.SetProgressSecondary(0, "");
+
+            foreach (string domainId in domainAttribute.SearchAllDomainId(this))
+            {
+                if (!crawlingTable.Any(f => f.DomainId == domainId))
+                {
+                    CrawlingData crawlingData = new CrawlingData();
+                    crawlingData.Domain = domainAttribute.Text;
+                    crawlingData.DomainId = domainId;
+                    crawlingTable.Add(crawlingData);
+                }
+            }
+
+            Clients.Caller.SetProgressPrimary(1, "カード情報の探索が完了しました。");
+            Clients.Caller.SetProgressSecondary(1, "");
+
+            Clients.Caller.SetCrawlingTable(JsonConvert.SerializeObject(crawlingTable));
+            Clients.Caller.EndSearching();
+        }
+
         /// <summary> 指定したドメインに存在する全ての <c>DomainId</c> を検索し、Crawlingテーブルと結合させて、そのテーブルをクライアントに返します。 </summary>
         /// <param name="userId"> 接続で使用するユーザーのID。 </param>
         /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
         /// <param name="domain"> ドメインを示す文字列。 </param>
-        public void SearchAllDomainId(string userId, string password, string domain)
+        [Obsolete]
+        public void SearchAllDomainIdOld(string userId, string password, string domain)
         {
-            DomainAttribute = ConvertToCrawledDomainAttribute(domain);
+            DomainAttributeOld = ConvertToCrawledDomainAttribute(domain);
 
             Clients.Caller.SetProgressPrimary(0, "データベースからドメインが一致するデータを検索します。");
             Clients.Caller.SetProgressSecondary(0, "");
@@ -161,13 +313,13 @@ namespace WixossSimulator.Crawling
             Clients.Caller.SetProgressPrimary((double)1 / 2, "ドメイン内からカード情報を探索します。");
             Clients.Caller.SetProgressSecondary(0, "");
 
-            foreach (string domainId in domainStrategy.SearchAllDomainId(this))
+            foreach (string domainId in domainStrategyOld.SearchAllDomainId(this))
             {
                 if (!fixedCrawlingTable.Any(f => f.DomainId == domainId))
                 {
                     FixedCrawlingData fixedCrawlingData = new FixedCrawlingData();
                     fixedCrawlingData.DomainId = domainId;
-                    fixedCrawlingData.Url = domainStrategy.ConvertDomainIdToUrl(domainId);
+                    fixedCrawlingData.Url = domainStrategyOld.ConvertDomainIdToUrl(domainId);
                     fixedCrawlingTable.Add(fixedCrawlingData);
                 }
             }
@@ -183,13 +335,139 @@ namespace WixossSimulator.Crawling
         /// <param name="userId"> 接続で使用するユーザーのID。 </param>
         /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
         /// <param name="domain"> ドメインを示す文字列。 </param>
+        /// <param name="crawlingTableJson"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
+        public void UpdateCrawlingTableNew(string userId, string password, string domain, string crawlingTableJson)
+        {
+            Clients.Caller.SetProgressPrimary(0, "データベースの更新を開始します。");
+            Clients.Caller.SetProgressSecondary(0, "");
+
+            domainAttribute = new DomainAttribute(domain);
+
+            //Clients.Caller.SetProgressSecondary(0, "データベースとの接続を開いています。");
+            List<CrawlingData> crawlingTable = JsonConvert.DeserializeObject<List<CrawlingData>>(crawlingTableJson);
+            int counter = 0;
+
+            foreach (CrawlingData crawlingData in crawlingTable)
+            {
+                counter++;
+                Clients.Caller.SetProgressPrimary((double)(counter - 1) / crawlingTable.Count, counter + "件目を更新中です。");
+
+                //削除されたデータは更新しない
+                if (crawlingData.Deleted.HasValue) { continue; }
+
+                string currentContent = null;
+
+                Clients.Caller.SetProgressSecondary((double)1 / 4, "ドメイン内のカード情報を取得しています。");
+                DateTime timeAcquired = DateTime.Now;
+
+                Clients.Caller.SetProgressSecondary((double)2 / 4, "クエリ文を作成しています。");
+
+                string query = CreateQuery(crawlingData, timeAcquired);
+                if (string.IsNullOrEmpty(query)) { continue; }
+
+                //using (SqlCommand command = new SqlCommand(query, connection))
+                //{
+                //    Clients.Caller.SetProgressSecondary((double)3 / 4, "クエリを発行しています");
+                //    command.ExecuteNonQuery();
+                //    //command.ExecuteNonQueryAsync();
+                //}
+
+                Clients.Caller.SetProgressSecondary(1, "クエリを発行しました。");
+            }
+
+            Clients.Caller.SetProgressSecondary(1, "データベースとの接続を閉じています。");
+
+            Clients.Caller.SetCrawlingTable(JsonConvert.SerializeObject(GetCrawlingTable()));
+
+            Clients.Caller.SetProgressPrimary(1, "データベースの更新が完了しました。");
+            Clients.Caller.SetProgressSecondary(1, "");
+        }
+
+        /// <summary> <c>fixedCrawlingData</c> とテーブル内、ドメイン内それぞれのカード情報から、SQL Server に発行するクエリを取得します。 </summary>
+        /// <param name="crawlingData"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
+        /// <param name="timeAcquired"> 現在のカード情報を取得した時刻。 </param>
+        /// <returns> SQL Server に発行するクエリ。 </returns>
+        private string CreateQuery(CrawlingData crawlingData, DateTime timeAcquired)
+        {
+            StringBuilder query = new StringBuilder();
+
+            string currentContent = null;
+            try { currentContent = domainAttribute.GetCurrentContent(crawlingData.DomainId); }
+            catch { currentContent = null; }
+
+            //テーブル内にまだ存在しないデータの場合
+            if (!crawlingData.LastUpdated.HasValue)
+            {
+                //データベースに存在せず、カード情報が取得できない場合(リンク切れなどが考えられる??)はクエリを発行しない
+                if (string.IsNullOrWhiteSpace(currentContent)) { return null; }
+                //カード情報を取得できた場合はデータを挿入するクエリを発行
+                query.Append("INSERT INTO Crawling ( Domain, DomainId, Content, LastUpdated, LastConfirmed )");
+                query.Append(" VALUES (");
+                query.Append(" N'").Append(domainAttribute.Text).Append("'");
+                query.Append(", N'").Append(crawlingData.DomainId).Append("'");
+                query.Append(", N'").Append(currentContent).Append("'");
+                query.Append(", '").Append(timeAcquired).Append("'");
+                query.Append(", '").Append(timeAcquired).Append("'");
+                query.Append(")");
+                return query.ToString();
+            }
+
+            //以下、データベースに既に存在するデータの場合
+
+            //テーブル内のカード情報を取得
+            string tableContent = null;
+
+
+            query.Append("UPDATE Crawling");
+
+            //現在のカード情報がドメイン上から取得できなくなっている場合
+            if (string.IsNullOrWhiteSpace(currentContent))
+            {
+                query.Append(" SET Deleted = '").Append(timeAcquired).Append("'");
+                query.Append(CreateQueryWhere(crawlingData));
+                return query.ToString();
+            }
+
+            //現在のカード情報とデータベースの情報が一致しない＝更新されている場合
+            if (currentContent != tableContent)
+            {
+                query.Append(" SET Content = N'").Append(currentContent).Append("'");
+                query.Append(", LastUpdated = '").Append(timeAcquired).Append("'");
+                query.Append(", LastConfirmed = '").Append(timeAcquired).Append("'");
+                query.Append(CreateQueryWhere(crawlingData));
+                return query.ToString();
+            }
+
+            //現在のカード情報とデータベースの情報が一致する＝更新されていない場合
+            query.Append(" SET LastConfirmed = '").Append(timeAcquired).Append("'");
+            query.Append(CreateQueryWhere(crawlingData));
+            return query.ToString();
+        }
+
+        /// <summary> <c>fixedCrawlingData</c> から、SQL Server に発行するクエリの検索条件を取得します。 </summary>
+        /// <param name="crawlingData"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
+        /// <returns> SQL Server に発行するクエリの検索条件。 </returns>
+        private string CreateQueryWhere(CrawlingData crawlingData)
+        {
+            StringBuilder query = new StringBuilder(" WHERE Deleted IS NULL");
+            query.Append(" AND domain = '").Append(domainAttribute.Text).Append("'");
+            query.Append(" AND domainId = '").Append(crawlingData.DomainId).Append("'");
+
+            return query.ToString();
+        }
+
+        /// <summary> クライアントのテーブルを基にデータベースを更新して、更新されたCrawlingテーブルをクライアントに返します。 </summary>
+        /// <param name="userId"> 接続で使用するユーザーのID。 </param>
+        /// <param name="password"> 接続で使用するユーザーのパスワード。 </param>
+        /// <param name="domain"> ドメインを示す文字列。 </param>
         /// <param name="fixedCrawlingTableJson"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
+        [Obsolete]
         public void UpdateCrawlingTable(string userId, string password, string domain, string fixedCrawlingTableJson)
         {
             Clients.Caller.SetProgressPrimary(0, "データベースの更新を開始します。");
             Clients.Caller.SetProgressSecondary(0, "");
 
-            DomainAttribute = ConvertToCrawledDomainAttribute(domain);
+            DomainAttributeOld = ConvertToCrawledDomainAttribute(domain);
 
             string connectionString = WixossCardDatabase.CreateConnectionString(userId, password);
             int counter = 0;
@@ -213,7 +491,7 @@ namespace WixossSimulator.Crawling
 
                     Clients.Caller.SetProgressSecondary(0, "テーブル内のカード情報を取得しています。");
                     using (SqlCommand command = new SqlCommand(
-                        "SELECT Content FROM Crawling WHERE Domain = N'" + DomainAttribute.ToString() + "' And DomainId = N'" + fixedCrawlingData.DomainId + "'",
+                        "SELECT Content FROM Crawling WHERE Domain = N'" + DomainAttributeOld.ToString() + "' And DomainId = N'" + fixedCrawlingData.DomainId + "'",
                         connection))
                     {
                         tableContent = command.ExecuteScalar() as string; //NULLチェック
@@ -222,7 +500,7 @@ namespace WixossSimulator.Crawling
 
                     Clients.Caller.SetProgressSecondary((double)1 / 4, "ドメイン内のカード情報を取得しています。");
                     DateTime timeAcquired = DateTime.Now;
-                    try { currentContent = domainStrategy.GetCurrentContent(fixedCrawlingData.DomainId); }
+                    try { currentContent = domainStrategyOld.GetCurrentContent(fixedCrawlingData.DomainId); }
                     catch { currentContent = null; }
 
                     Clients.Caller.SetProgressSecondary((double)2 / 4, "クエリ文を作成しています。");
@@ -254,6 +532,7 @@ namespace WixossSimulator.Crawling
         /// <param name="currentContent"> 現在のカード情報を示す文字列。 </param>
         /// <param name="timeAcquired"> 現在のカード情報を取得した時刻。 </param>
         /// <returns> SQL Server に発行するクエリ。 </returns>
+        [Obsolete]
         private string CreateQuery(FixedCrawlingData fixedCrawlingData, string tableContent, string currentContent, DateTime timeAcquired)
         {
             StringBuilder query = new StringBuilder();
@@ -266,7 +545,7 @@ namespace WixossSimulator.Crawling
                 //カード情報を取得できた場合はデータを挿入するクエリを発行
                 query.Append("INSERT INTO Crawling ( Domain, DomainId, Content, LastUpdated, LastConfirmed )");
                 query.Append(" VALUES (");
-                query.Append(" N'").Append(DomainAttribute.ToString()).Append("'");
+                query.Append(" N'").Append(DomainAttributeOld.ToString()).Append("'");
                 query.Append(", N'").Append(fixedCrawlingData.DomainId).Append("'");
                 query.Append(", N'").Append(currentContent).Append("'");
                 query.Append(", '").Append(timeAcquired).Append("'");
@@ -305,10 +584,11 @@ namespace WixossSimulator.Crawling
         /// <summary> <c>fixedCrawlingData</c> から、SQL Server に発行するクエリの検索条件を取得します。 </summary>
         /// <param name="fixedCrawlingData"> クライアント側のJavaScriptのフォーマットに従っているCrawlingテーブルのデータ。 </param>
         /// <returns> SQL Server に発行するクエリの検索条件。 </returns>
+        [Obsolete]
         private string CreateQueryWhere(FixedCrawlingData fixedCrawlingData)
         {
             StringBuilder query = new StringBuilder(" WHERE Deleted IS NULL");
-            query.Append(" AND Domain = N'").Append(DomainAttribute.ToString()).Append("'");
+            query.Append(" AND Domain = N'").Append(DomainAttributeOld.ToString()).Append("'");
             query.Append(" AND DomainId = N'").Append(fixedCrawlingData.DomainId).Append("'");
 
             return query.ToString();
@@ -317,9 +597,10 @@ namespace WixossSimulator.Crawling
         /// <summary> 文字列からドメインを示す列挙値に変換します。 </summary>
         /// <param name="domain"> ドメインを示す文字列。 </param>
         /// <returns> ドメインを示す列挙値。 </returns>
-        private DomainAttribute ConvertToCrawledDomainAttribute(string domain)
+        [Obsolete]
+        private DomainKind ConvertToCrawledDomainAttribute(string domain)
         {
-            return (DomainAttribute)Enum.Parse(typeof(DomainAttribute), domain);
+            return (DomainKind)Enum.Parse(typeof(DomainKind), domain);
         }
     }
 
@@ -334,28 +615,16 @@ namespace WixossSimulator.Crawling
     {
         /// <summary>ドメインを示すURLを取得します。 </summary>
         string Url { get; }
-        /// <summary> そのドメインに存在する全てのカード情報を識別する <c>DomainId</c> を取得します。 </summary>
-        /// <param name="crawler"> 進捗状況をクライアントに返すためのハブであるクラス。 </param>
-        /// <returns> カード情報を識別する <c>DomainId</c> の一覧。 </returns>
-        HashSet<string> SearchAllDomainId(Crawler crawler);
-        /// <summary> カード情報を識別する <c>DomainId</c> に対応するURLを取得します。 </summary>
-        /// <param name="domainId"> カード情報を識別する <c>DomainId</c>。 </param>
-        /// <returns> カード情報を示すURL。 </returns>
-        string ConvertDomainIdToUrl(string domainId);
-        /// <summary> カード情報を示すURLから対応する <c>DomainId</c> を取得します。 </summary>
-        /// <param name="url"> カード情報を示すURL。 </param>
-        /// <returns> カード情報を識別する <c>DomainId</c>。 </returns>
-        string ConvertUrlToDomainId(string url);
 
-        /// <summary> 現在のカード情報を取得します。 </summary>
-        /// <param name="domainId"> カード情報を識別する <c>DomainId</c>。 </param>
-        /// <returns> 現在のカード情報を示す文字列。 </returns>
+        HashSet<string> SearchAllDomainId(Crawler crawler);
+        string ConvertDomainIdToUrl(string domainId);
+        string ConvertUrlToDomainId(string url);
         string GetCurrentContent(string domainId);
         ////Cardクラスの型に一致するように変換する
         //Card.Card ConvertToCard(string html);
     }
 
-    public class UnknownStrategy : IDomainStrategy
+    public class UnknownDomainStrategy : IDomainStrategy
     {
         public string Url { get { return "http://"; } }
 
@@ -381,7 +650,7 @@ namespace WixossSimulator.Crawling
         }
     }
 
-    public class OfficialStrategy : IDomainStrategy
+    public class OfficialDomainStrategy : IDomainStrategy
     {
         public string Url { get { return "http://www.takaratomy.co.jp/"; } }
 
@@ -460,7 +729,7 @@ namespace WixossSimulator.Crawling
         }
     }
 
-    public class WikiStrategy : IDomainStrategy
+    public class WikiDomainStrategy : IDomainStrategy
     {
         public string Url { get { return "http://wixoss.81.la/"; } }
 

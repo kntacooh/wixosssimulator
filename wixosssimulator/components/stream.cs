@@ -13,11 +13,11 @@ namespace WixossSimulator
     public class HtmlStream
     {
         /// <summary> HTMLドキュメントの内容を文字コードを合わせて取得します。 </summary>
-        /// <param name="path"> ローカルまたはインターネット上のアドレスを表す絶対パス。 </param>
+        /// <param name="address"> ローカルまたはインターネット上のアドレスを表す絶対パス。 </param>
         /// <returns> HTMLドキュメント。 </returns>
-        public static string GetDocument(string path)
+        public static string GetDocument(string address)
         {
-            Uri uri = new Uri(path);
+            Uri uri = new Uri(address);
             return GetDocument(uri);
         }
         /// <summary> HTMLドキュメントの内容を文字コードを合わせて取得します。 </summary>
@@ -44,8 +44,25 @@ namespace WixossSimulator
                 }
                 if (client.Encoding == Encoding.UTF8) { return tempDocument; }
                 else { return client.DownloadString(address); }
-
             }
+        }
+
+        //UTF-8でPOSTでデータを送信して、結果を取得します。
+        public static string GetDocumentByPosting(string postData, string address)
+        {
+            Uri uri = new Uri(address);
+            return GetDocumentByPosting(postData, uri);
+        }
+
+        public static string GetDocumentByPosting(string postData, Uri uri)
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                return client.UploadString(uri, postData);
+            }
+
         }
     }
 }

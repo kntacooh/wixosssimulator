@@ -19,6 +19,7 @@
             UserID: <input data-bind="value: userId" />
             Password: <input type="password" data-bind="value: password" />
         </p>
+        <button data-bind="click: testing">test</button>
 
         <hr />
 
@@ -48,9 +49,9 @@
 
         <p>
             進捗状況: <br />
-            <progress max="1" data-bind="value: progressPrimary"></progress>
+            <progress max="1" data-bind="value: progressPrimary"></progress><br />
             <span data-bind="text: progressPrimaryMessage"></span><br />
-            <progress max="1" data-bind="value: progressSecondary"></progress>
+            <progress max="1" data-bind="value: progressSecondary"></progress><br />
             <span data-bind="text: progressSecondaryMessage"></span><br />
         </p>
 

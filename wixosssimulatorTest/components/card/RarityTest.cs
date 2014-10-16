@@ -46,7 +46,7 @@ namespace wixosssimulatorTest.components.card
         [ExpectedException(typeof(KeyNotFoundException))]
         public void Rarity_あり得ない文字列から初期化()
         {
-            Rarity r = new Rarity("");
+            Rarity r = new Rarity("NotFound");
         }
     }
 }

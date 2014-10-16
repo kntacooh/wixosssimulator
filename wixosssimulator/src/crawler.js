@@ -1,5 +1,5 @@
 ﻿$(function () {
-    var connection = $.hubConnection('/signalr', { useDefaultPath: false }), // 本番環境では '/wixosssimulator/signalr' なんだけど……
+    var connection = $.hubConnection('/signalr', { useDefaultPath: false }), // /wixosssimulator
         crawler = connection.createHubProxy("crawler"),
 
         vm = {
@@ -25,12 +25,16 @@
                 vm.crawlingTable.removeAll();
 
                 vm.isLoadCrawlingTable(true);
-                crawler.invoke("SearchAllDomainId", vm.userId(), vm.password(), vm.domain());
+                crawler.invoke("SearchAllDomainId", vm.domain());
             },
 
             enableToUpdate: ko.observable(false),
             startUpdating: function () {
                 crawler.invoke("UpdateCrawlingTable", vm.userId(), vm.password(), vm.domain(), ko.toJSON(vm.crawlingTable()));
+            },
+
+            testing: function () {
+                crawler.invoke("Testing");
             }
 
         };
@@ -63,6 +67,7 @@
         vm.domainAttribute.push(domain);
     });
 
+    //引数にnullが来ないようにしたい。とは思う。
     crawler.on("SetCrawlingTable", function (crawlingTable) {
         vm.crawlingTable($.map(JSON.parse(crawlingTable), function (data) {
             return new CrawlingData(data);

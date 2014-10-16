@@ -17,7 +17,7 @@ namespace WixossSimulator.test
 
         public void GetDomainList() 
         {
-            foreach (string s in Enum.GetNames(typeof(DomainAttribute)))
+            foreach (string s in Enum.GetNames(typeof(DomainKind)))
             {
                 Clients.All.SetDomainName(s);
             }

@@ -101,6 +101,7 @@ namespace WixossSimulator.Card
         /// <returns> レアリティを示す列挙値。 </returns>
         public static RarityKind ConvertRarityKindToText(string text)
         {
+
             return Text[string.Concat(text.Where(c => !char.IsWhiteSpace(c)))];
         }
 
@@ -135,6 +136,102 @@ namespace WixossSimulator.Card
         SP = 53,
         /// <summary> ？？？ (???) </summary>
         Question = 99,
+    }
+
+    /// <summary>  </summary>
+    public static class RarityExtension
+    {
+        #region RarityKindに対応する各種連想配列
+        /// <summary> キーをレアリティを示す文字列、値を対応する列挙値とする、読み取り専用の連想配列を取得します。 </summary>
+        private static ReadOnlyDictionary<string, RarityKind> textRarity = new ReadOnlyDictionary<string, RarityKind>(
+            new Dictionary<string, RarityKind>(new IgnoreVariousTypeComparer()/*StringComparer.InvariantCultureIgnoreCase*/)
+            {
+                {"コモン",RarityKind.C},
+                {"C",RarityKind.C},
+                {"Common",RarityKind.C},
+
+                {"レア",RarityKind.R},
+                {"R",RarityKind.R},
+                {"Rare",RarityKind.R},
+
+                {"ルリグコモン",RarityKind.LC},
+                {"LC",RarityKind.LC},
+                {"LrigCommon",RarityKind.LC},
+
+                {"スーパーレア",RarityKind.SR},
+                {"SR",RarityKind.SR},
+                {"SuperRare",RarityKind.SR},
+
+                {"ルリグレア",RarityKind.LR},
+                {"LR",RarityKind.LR},
+                {"LrigRare",RarityKind.LR},
+
+                {"シークレット",RarityKind.Secret},
+                {"Secret",RarityKind.Secret},
+
+                {"プロモーションカード",RarityKind.PR},
+                {"PR",RarityKind.PR},
+                {"PromotionCard",RarityKind.PR},
+
+                {"構築済みデッキ",RarityKind.ST},
+                {"ST",RarityKind.ST},
+                {"StructureDeck",RarityKind.ST},
+
+                {"SP",RarityKind.SP},
+
+                //{"？？？",RarityKind.Question},
+                {"???",RarityKind.Question},
+                {"Question",RarityKind.Question},
+            });
+        /// <summary> キーをレアリティを示す列挙値、値を対応する印刷時の記号とする、読み取り専用の連想配列を取得します。 </summary>
+        private static ReadOnlyDictionary<RarityKind, string> printedSign = new ReadOnlyDictionary<RarityKind, string>(
+            new Dictionary<RarityKind, string>()
+            {
+                {RarityKind.C, "●C"},
+                {RarityKind.R, "●●R"},
+                {RarityKind.LC, "●●●LC"},
+                {RarityKind.SR, "●●●●SR"},
+                {RarityKind.LR, "●●●●●LR"},
+                {RarityKind.Secret, "●SECRET●"},
+                {RarityKind.PR, "●●●PR"},
+                {RarityKind.ST, "●●●ST"},
+                {RarityKind.SP, "●●●SP"},
+                {RarityKind.Question, "●???●"},
+            });
+        /// <summary> キーをレアリティを示す列挙値、値を対応する日本語の文字列とする、読み取り専用の連想配列を取得します。 </summary>
+        private static ReadOnlyDictionary<RarityKind, string> japaneseText = new ReadOnlyDictionary<RarityKind, string>(
+            new Dictionary<RarityKind, string>()
+            {
+                {RarityKind.C, "コモン"},
+                {RarityKind.R, "レア"},
+                {RarityKind.LC, "ルリグコモン"},
+                {RarityKind.SR, "スーパーレア"},
+                {RarityKind.LR, "ルリグレア"},
+                {RarityKind.Secret, "シークレット"},
+                {RarityKind.PR, "プロモーションカード"},
+                {RarityKind.ST, "構築済みデッキ"},
+                {RarityKind.SP, "SP"},
+                {RarityKind.Question, "？？？"},
+            });
+        #endregion
+
+        /// <summary> レアリティを示す文字列を、対応する列挙値に変換します。 </summary>
+        /// <param name="text"> レアリティを示す文字列。 </param>
+        /// <returns> レアリティを示す列挙値。 </returns>
+        public static RarityKind ToRarity(this string text)
+        { 
+            return textRarity[string.Concat(text.Where(c => !char.IsWhiteSpace(c)))]; 
+        }
+
+        /// <summary> レアリティを示す列挙値を、対応する印刷記号に変換します。 </summary>
+        /// <param name="rarity"> レアリティを示す列挙値。 </param>
+        /// <returns> レアリティを示す印刷記号。 </returns>
+        public static string ToPrintedSign(this RarityKind rarity) { return printedSign[rarity]; }
+
+        /// <summary> レアリティを示す列挙値を、対応する日本語の文字列に変換します。 </summary>
+        /// <param name="rarity"> レアリティを示す列挙値。 </param>
+        /// <returns> レアリティを示す日本語の文字列。 </returns>
+        public static string ToJapaneseText(this RarityKind rarity) { return japaneseText[rarity]; }
     }
 
     /// <summary> 大文字と小文字、カナ型(ひらがなとカタカナ)、半角と全角、の３つを無視する文字列の比較を提供します。 </summary>
