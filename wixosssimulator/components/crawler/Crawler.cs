@@ -152,20 +152,36 @@ namespace WixossSimulator.Crawling
             if (!s.CreateAccessToken()) { Clients.Caller.SetProgressPrimary(1, "アクセストークンを取得できませんでした。"); }
             //s.Authorization = "";
             //s.Expiration = DateTime.Parse("2014/10/14 1:15:04");
-            long userId = 0;
-            string folder = ":sc:0:000";
-
             string result = "";
-            var result01 = s.RetrieveUserInformation(userId + 50);
-            result += "----- 1. " + result01.BodyString;
-            //var result02 = s.RetrieveSyncFoldersCollection(userId);
+
+            //string folder0 = "17823287_19270";
+            //var result01 = s.RetrieveUserInformation();
+            //result += "----- 1. " + result01.BodyString;
+            //var result02 = s.RetrieveSyncFoldersCollection();
             //result += "----- 2. " + result02.BodyString;
-            //var result03 = s.RetrieveFolders(folder);
+            //var result03 = s.RetrieveFolders(folder0);
             //result += "----- 3. " + result03.BodyString;
-            //var result04 = s.RetrieveFolderInformation(folder);
+            //var result04 = s.RetrieveFolderInformation(folder0);
             //result += "----- 4. " + result04.BodyString;
-            var result05 = s.RetrieveFolderContents(folder, RetrievingFolderType.None, 5, 10);
-            result += "----- 5. " + result05.BodyString;
+            //var result05 = s.RetrieveFolderContents(folder0, RetrievingFolderType.None, 5, 10, RetrievingFolderOrder.LastModified);
+            //result += "----- 5. " + result05.BodyString;
+            //var result06 = s.RetrieveFolderContents(folder0, RetrievingFolderType.File, 5, 10, RetrievingFolderOrder.LastModified);
+            //result += "----- 6. " + result06.BodyString;
+
+            string folder1 = "";
+            string file1 = "";
+            //var result11 = s.CreateFolder(folder1, "testFolder");
+            //result += "----- 1. " + result11.ToString();
+            //var result12 = s.CreateFile(folder1, "test01.txt");
+            //result += "----- 2. " + result12.ToString();
+            //var result13 = s.CreateFile(folder1, "test02.txt", "text/plain");
+            //result += "----- 3. " + result13.ToString();
+            var result14 = s.CopyFile(folder1, file1, "copy01.png");
+            result += "----- 4. " + result14.ToString();
+            //var result15 = s.CopyFile(folder1, file1, "copy01.png");
+            //result += "----- 5. " + result15.ToString();
+            var result16 = s.RetrieveFolderContents(folder1);
+            result += "----- 6. " + result16.BodyString;
             Clients.Caller.SetProgressPrimary(1, result);
         }
 

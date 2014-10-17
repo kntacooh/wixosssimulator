@@ -11,11 +11,13 @@ namespace WixossSimulator.SugarSync
     [XmlRoot("folder")]
     public class FolderResource
     {
-        public class SharingEnabled
+        public class FolderResourceSharing
         {
             [XmlAttribute("enabled")]
             public bool Enabled { get; set; }
         }
+
+
 
         /// <summary> The user-visible name of the folder. </summary>
         [XmlElement("displayName")]
@@ -53,7 +55,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> Whether this is a shared folder (true) or not a shared folder (false). </summary>
         [XmlElement("sharing")]
-        public SharingEnabled Sharing { get; set; }
+        public FolderResourceSharing Sharing { get; set; }
     }
 
 }

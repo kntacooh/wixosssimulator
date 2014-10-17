@@ -146,6 +146,7 @@
     <Compile Include="components\SugarSync\FileResource.cs" />
     <Compile Include="components\SugarSync\FolderResource.cs" />
     <Compile Include="components\SugarSync\FoldersCollectionResource.cs" />
+    <Compile Include="components\SugarSync\SugarSyncResponse.cs" />
     <Compile Include="components\SugarSync\UserResource.cs" />
     <Compile Include="components\SugarSync\WorkspaceResource.cs" />
     <Compile Include="components\SugarSync\WorkspacesCollectionResource.cs" />

@@ -5,14 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-using System.Net;
-using System.IO;
-using System.Text; //StringBuilder
-
-using System.Xml; //XmlDocument
-using System.Xml.Linq; //XDocument
-using System.Xml.Serialization; //XmlSerializer
 using System.Collections.Specialized; //NameValueCollection
+
+using System.Net; //WebClient
+//using System.IO;
+//using System.Text; //StringBuilder
+
+//using System.Xml; //XmlDocument
+//using System.Xml.Linq; //XDocument
+//using System.Xml.Serialization; //XmlSerializer
 //using DropNet;
 
 namespace WixossSimulator.SugarSync
@@ -24,67 +25,42 @@ namespace WixossSimulator.SugarSync
     /// <summary> WixossSimulator のための SugarSync API のラッパーを提供します？ </summary>
     public class SugarsyncApiWrapper
     {
+        private string userPrefix { get { return "https://api.sugarsync.com/user/" + userId.ToString(); } }
+        private string workspacePrefix { get { return "https://api.sugarsync.com/workspace/:sc:" + userId.ToString() + ":"; } }
+        private string folderPrefix { get { return "https://api.sugarsync.com/folder/:sc:" + userId.ToString() + ":"; } }
+        private string filePrefix { get { return "https://api.sugarsync.com/file/:sc:" + userId.ToString() + ":"; } }
+
 #if(Authorizationを変更可能にする)
-        public string Authorization { get; set; }
+        public string authorization { get; set; }
+        public long userId { get; set; }
+
         public DateTime Expiration { get; set; }
-        public long UserId { get; set; }
 #else
-        public string Authorization { get; private set; }
+        private string authorization { get; set; }
+        private long userId { get; set; }
+
         public DateTime Expiration { get; private set; }
-        public long UserId { get; private set; }
 #endif
 
         public SugarsyncApiWrapper()
         {
-            Expiration = DateTime.Now;
-            Authorization = null;
-            UserId = -1;
+            Expiration = DateTime.MinValue;
+            authorization = null;
+            userId = -1;
         }
 
         /// <summary>
-        /// Authorizationのみ取得、レスポンスボディは無視。
-        /// (レスポンスボティについては https://www.sugarsync.com/dev/api/auth-resource.html を参照)
+        /// APIを通してユーザーのリソースにアクセスするための認証を行います。
+        /// (ここで作成されるアクセストークンの有効期限は1時間)
+        /// https://www.sugarsync.com/dev/api/method/create-auth-token.html
         /// </summary>
         /// <returns></returns>
-        public bool CreateAccessTokenOld()
-        {
-            string tokenAuthRequest;
-            using (WebClient client = new WebClient())
-            {
-                Uri uri = new Uri("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml");
-                try { tokenAuthRequest = client.DownloadString(uri); }
-                catch { tokenAuthRequest = null; }
-            }
-            if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = System.Text.Encoding.UTF8;
-                client.Headers.Add("Content-Type", "application/xml");
-                try
-                {
-                    Expiration = DateTime.Now.AddHours(1);
-                    client.UploadString("https://api.sugarsync.com/authorization", tokenAuthRequest);
-                    Authorization = client.ResponseHeaders["Location"];
-                }
-                catch
-                {
-                    Expiration = DateTime.Now;
-                    Authorization = null;
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public bool CreateAccessToken()
         {
             string tokenAuthRequest;
             using (WebClient client = new WebClient())
             {
                 try { tokenAuthRequest = client.DownloadString("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"); }
-                //try { tokenAuthRequest = client.DownloadString(new Uri("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml")); }
                 catch { tokenAuthRequest = null; }
             }
             if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
@@ -92,37 +68,19 @@ namespace WixossSimulator.SugarSync
             try
             {
                 Expiration = DateTime.MaxValue;
-                var response = new HttpResponseByPostMethod<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
+                var response = new SugarSyncResponseByPostOrPutMethod<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
 
                 Expiration = response.Body.Expiration;
-                Authorization = response.Header["Location"];
-                UserId = response.Body.UserId;
+                authorization = response.Header["Location"];
+                userId = response.Body.UserId;
             }
             catch
             {
-                Expiration = DateTime.Now;
-                Authorization = null;
-                UserId = -1;
+                Expiration = DateTime.MinValue;
+                authorization = null;
+                userId = -1;
                 return false;
             }
-
-            //using (WebClient client = new WebClient())
-            //{
-            //    client.Encoding = System.Text.Encoding.UTF8;
-            //    client.Headers.Add("Content-Type", "application/xml");
-            //    try
-            //    {
-            //        Expiration = DateTime.Now.AddHours(1);
-            //        client.UploadString("https://api.sugarsync.com/authorization", tokenAuthRequest);
-            //        Authorization = client.ResponseHeaders["Location"];
-            //    }
-            //    catch
-            //    {
-            //        Expiration = DateTime.Now;
-            //        Authorization = null;
-            //        return false;
-            //    }
-            //}
 
             return true;
         }
@@ -133,55 +91,55 @@ namespace WixossSimulator.SugarSync
         /// </summary>
         /// <param name="userId"> ユーザーID。 </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<UserResource> RetrieveUserInformation(long userId)
+        public SugarSyncResponse<UserResource> RetrieveUserInformation()
         {
-            return new HttpResponseByGetMethod<UserResource>(this, "https://api.sugarsync.com/user/" + userId.ToString());
+            return new SugarSyncResponseByGetMethod<UserResource>(this, userPrefix);
         }
 
         /// <summary>
-        /// ユーザーのアカウント中にあるworkspaceについての情報を取得します。
+        /// ユーザーのアカウント中にあるWorkspaceについての情報を取得します。
         /// https://www.sugarsync.com/dev/api/method/get-workspaces.html
         /// </summary>
         /// <param name="userId"> ユーザーID。 </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<WorkspacesCollectionResource> RetrieveWorkspacesCollection(long userId)
+        public SugarSyncResponse<WorkspacesCollectionResource> RetrieveWorkspacesCollection()
         {
-            return new HttpResponseByGetMethod<WorkspacesCollectionResource>(this, "https://api.sugarsync.com/user/" + userId.ToString() + "/workspaces/contents");
+            return new SugarSyncResponseByGetMethod<WorkspacesCollectionResource>(this, userPrefix + "/workspaces/contents");
         }
 
         /// <summary>
-        /// workspaceについての情報を取得します。
+        /// Workspaceについての情報を取得します。
         /// https://www.sugarsync.com/dev/api/method/get-workspace-info.html
         /// </summary>
-        /// <param name="workspace"> workspaceを示すID? </param>
+        /// <param name="workspaceId"> Workspaceを示すID? </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<WorkspaceResource> RetrieveWorkspaceCollection(string workspace)
+        public SugarSyncResponse<WorkspaceResource> RetrieveWorkspaceInformation(string workspaceId)
         {
-            return new HttpResponseByGetMethod<WorkspaceResource>(this, "https://api.sugarsync.com/workspace/" + workspace);
+            return new SugarSyncResponseByGetMethod<WorkspaceResource>(this, workspacePrefix + workspaceId);
         }
 
         /// <summary>
-        /// workspaceのコンテンツを取得します。
+        /// Workspaceのコンテンツを取得します。
         /// https://www.sugarsync.com/dev/api/method/get-workspace-contents.html
         /// </summary>
-        /// <param name="workspace"> workspaceを示すID? </param>
+        /// <param name="workspaceId"> Workspaceを示すID? </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<FoldersCollectionResource> RetrieveWorkspaceContents(string workspace)
+        public SugarSyncResponse<FoldersCollectionResource> RetrieveWorkspaceContents(string workspaceId)
         {
-            return new HttpResponseByGetMethod<FoldersCollectionResource>(this, "https://api.sugarsync.com/workspace/" + workspace + "/contents");
+            return new SugarSyncResponseByGetMethod<FoldersCollectionResource>(this, workspacePrefix + workspaceId + "/contents");
         }
 
         /// <summary>
-        /// workspaceの属性を更新します。
+        /// Workspaceの属性を更新します。
         /// https://www.sugarsync.com/dev/api/method/update-workspace-name.html
         /// </summary>
-        /// <param name="workspace"> workspaceを示すID? </param>
-        /// <param name="workspaceResource"> workspaceを示すクラス </param>
+        /// <param name="workspaceResource"> 更新されたWorkspaceを示すクラス。 </param>
         /// <returns></returns>
-        public bool UpdateWorkspaceInformation(string workspace, WorkspaceResource workspaceResource)
+        public bool UpdateWorkspaceInformation(WorkspaceResource workspaceResource)
         {
-            //workspaceはworkspaceResourceのDsidで代用可能?
-            throw new NotImplementedException("未実装です。");
+            string workspaceId = workspaceResource.Dsid.Replace("/sc/" + userId.ToString() + "/", "");
+            return new SugarSyncResponseByPostOrPutMethod<object>(this, workspacePrefix + workspaceId, workspaceResource)
+                .Header != null;
         }
 
         /// <summary>
@@ -198,19 +156,19 @@ namespace WixossSimulator.SugarSync
         /// If this parameter is not specified, no limit is placed on the number of retrieved sync folders.
         /// </param>
         /// <returns>  </returns>
-        public HttpResponseByGetMethod<FoldersCollectionResource> RetrieveSyncFoldersCollection(long userId, long start = 0, long max = 0)
+        public SugarSyncResponse<FoldersCollectionResource> RetrieveSyncFoldersCollection(long start = 0, long max = 0)
         {
             NameValueCollection getQuery = new NameValueCollection();
             if (start > 0) { getQuery.Add("start", start.ToString()); }
             if (max > 0) { getQuery.Add("max", max.ToString()); }
-            return new HttpResponseByGetMethod<FoldersCollectionResource>(this, "https://api.sugarsync.com/user/" + userId.ToString() + "/folders/contents", getQuery);
+            return new SugarSyncResponseByGetMethod<FoldersCollectionResource>(this, userPrefix + "/folders/contents", getQuery);
         }
 
         /// <summary>
         /// 親フォルダに含まれるフォルダを取得します。(workspaceは <c> RetrieveWorkspaceContents </c> メソッドを使用してください?)
         /// https://www.sugarsync.com/dev/api/method/get-folders.html
         /// </summary>
-        /// <param name="folder"> 親フォルダを示すID? </param>
+        /// <param name="folderId"> 親フォルダを示すID? </param>
         /// <param name="start"> 
         /// Specifies the index within the indexed sequence of folders where the client wants folders to be retrieved.
         /// The index starts at origin 0. The default value is 0.
@@ -220,31 +178,31 @@ namespace WixossSimulator.SugarSync
         /// If this parameter is not specified, no limit is placed on the number of retrieved folders.
         /// </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<FoldersCollectionResource> RetrieveFolders(string folder, long start = 0, long max = 0)
+        public SugarSyncResponse<FoldersCollectionResource> RetrieveFolders(string folderId, long start = 0, long max = 0)
         {
             NameValueCollection getQuery = new NameValueCollection();
             getQuery.Add("type", RetrievingFolderType.Folder.ToApiString());
             if (start > 0) { getQuery.Add("start", start.ToString()); }
             if (max > 0) { getQuery.Add("max", max.ToString()); }
-            return new HttpResponseByGetMethod<FoldersCollectionResource>(this, "https://api.sugarsync.com/folder/" + folder + "/contents", getQuery);
+            return new SugarSyncResponseByGetMethod<FoldersCollectionResource>(this, folderPrefix + folderId + "/contents", getQuery);
         }
 
         /// <summary>
         /// フォルダについての情報を取得します。
         /// https://www.sugarsync.com/dev/api/method/get-folder-info.html
         /// </summary>
-        /// <param name="folder"> フォルダを示すID? </param>
+        /// <param name="folderId"> フォルダを示すID? </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<FolderResource> RetrieveFolderInformation(string folder)
+        public SugarSyncResponse<FolderResource> RetrieveFolderInformation(string folderId)
         {
-            return new HttpResponseByGetMethod<FolderResource>(this, "https://api.sugarsync.com/folder/" + folder);
+            return new SugarSyncResponseByGetMethod<FolderResource>(this, folderPrefix + folderId);
         }
 
         /// <summary>
         /// フォルダのコンテンツを取得します。
         /// https://www.sugarsync.com/dev/api/method/get-folder-contents.html
         /// </summary>
-        /// <param name="folder"> フォルダを示すID? </param>
+        /// <param name="folderId"> フォルダを示すID? </param>
         /// <param name="type">
         /// The type of folder contents to be listed in the response: folders or files.
         /// If no object of the listed type is in the folder, no folder contents are listed in the response.
@@ -269,8 +227,8 @@ namespace WixossSimulator.SugarSync
         /// </list>
         /// </param>
         /// <returns></returns>
-        public HttpResponseByGetMethod<FoldersCollectionResource> RetrieveFolderContents(
-            string folder,
+        public SugarSyncResponse<FoldersCollectionResource> RetrieveFolderContents(
+            string folderId,
             RetrievingFolderType type = RetrievingFolderType.None,
             long start = 0, long max = 0,
             RetrievingFolderOrder order = RetrievingFolderOrder.None)
@@ -279,178 +237,58 @@ namespace WixossSimulator.SugarSync
             if (type != RetrievingFolderType.None) { getQuery.Add("type", type.ToApiString()); }
             if (start > 0) { getQuery.Add("start", start.ToString()); }
             if (max > 0) { getQuery.Add("max", max.ToString()); }
-            if (order!= RetrievingFolderOrder.None) { getQuery.Add("order", order.ToApiString()); }
-            return new HttpResponseByGetMethod<FoldersCollectionResource>(this, "https://api.sugarsync.com/folder/" + folder + "/contents", getQuery);
+            if (order != RetrievingFolderOrder.None) { getQuery.Add("order", order.ToApiString()); }
+            return new SugarSyncResponseByGetMethod<FoldersCollectionResource>(this, folderPrefix + folderId + "/contents", getQuery);
         }
 
         /// <summary>
-        /// フォルダの内部に別のフォルダを作成します。
+        /// フォルダの中に別のフォルダを作成します。
         /// https://www.sugarsync.com/dev/api/method/create-folder.html
         /// </summary>
-        /// <param name="folder"> 親フォルダを示すID? </param>
-        /// <param name="createdFolderName"> 新しく作成されるフォルダの名前。 </param>
+        /// <param name="folderId"> 親フォルダを示すID? </param>
+        /// <param name="displayName"> The user-visible name of the new subfolder. </param>
         /// <returns></returns>
-        public bool CreateFolder(string folder, string createdFolderName)
+        public bool CreateFolder(string folderId, string displayName)
         {
-            throw new NotImplementedException("未実装です。");
+            string requestBody = "<folder><displayName>" + displayName + "</displayName></folder>";
+            return new SugarSyncResponseByPostOrPutMethod<object>(this, folderPrefix + folderId, requestBody)
+                .Header != null;
         }
 
         /// <summary>
-        /// 
+        /// フォルダの中にファイルを作成します。
+        /// https://www.sugarsync.com/dev/api/method/create-file.html
         /// </summary>
-        /// <param name="folder"> 親フォルダを示すID? </param>
-        /// <param name="createdFolderName"> 新しく作成されるフォルダの名前。 </param>
+        /// <param name="folderId"> フォルダを示すID? </param>
+        /// <param name="displayName"> The user-visible name of the file to be created. </param>
+        /// <param name="mediaType"> The media type of the file to be created, such as image/jpeg. </param>
         /// <returns></returns>
-        public bool CreateFile(string folder, string createdFolderName)
+        public bool CreateFile(string folderId, string displayName, string mediaType = null)
         {
-            throw new NotImplementedException("未実装です。");
+            string requestBody = "<file><displayName>" + displayName + "</displayName>";
+            if (!string.IsNullOrWhiteSpace(mediaType)) { requestBody += "<mediaType>" + mediaType + "</mediaType>"; }
+            requestBody += "</file>";
+            return new SugarSyncResponseByPostOrPutMethod<object>(this, folderPrefix + folderId, requestBody)
+                .Header != null;
         }
-    }
 
-    /// <summary> HTTPサーバーにGETメソッド(GETリクエスト)でデータを送信して、そのレスポンスを格納します？ </summary>
-    /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
-    public class HttpResponseByGetMethod<T> where T : class, new()
-    {
-        public WebHeaderCollection Header { get; private set; }
-        public T Body { get; private set; }
-        public string BodyString { get; private set; }
-
-        /// <summary>  </summary>
-        /// <param name="wrapper">  </param>
-        /// <param name="url">  </param>
-        public HttpResponseByGetMethod(SugarsyncApiWrapper wrapper, string url) : this(wrapper, url, new NameValueCollection()) { }
-
-        /// <summary>  </summary>
-        /// <param name="wrapper">  </param>
-        /// <param name="url">  </param>
-        /// <param name="getQuery">  </param>
-        public HttpResponseByGetMethod(SugarsyncApiWrapper wrapper, string url, NameValueCollection getQuery)
+        /// <summary>
+        /// フォルダの中に既存のファイルのコピーを作成します。
+        /// https://www.sugarsync.com/dev/api/method/copy-file.html
+        /// </summary>
+        /// <param name="folderId"> フォルダを示すID? </param>
+        /// <param name="copiedFileId"> コピーされるファイルを示すID? </param>
+        /// <param name="displayName"> The name of new file copy. </param>
+        /// <returns></returns>
+        public bool CopyFile(string folderId, string copiedFileId, string displayName)
         {
-            if (wrapper.Expiration < DateTime.Now) { return; }
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = System.Text.Encoding.UTF8;
-                client.Headers.Add("Authorization", wrapper.Authorization);
-                client.QueryString = getQuery;
-
-                try
-                {
-                    BodyString = client.DownloadString(url);
-                }
-                catch
-                {
-
-                }
-                //using (Stream stream = client.OpenRead(url))
-                //{
-                //    try { using (StreamReader reader = new StreamReader(stream)) { BodyString = reader.ReadToEnd(); } }
-                //    catch { BodyString = null; }
-                //}
-
-                try
-                {
-                    Type t = typeof(T);
-                    if (t == typeof(XDocument)) { Body = XDocument.Parse(BodyString) as T; }
-                    else if (t == typeof(XmlDocument)) 
-                    {
-                        XmlDocument document = new XmlDocument();
-                        document.LoadXml(BodyString);
-                        Body = document as T;
-                    }
-                    else
-                    {
-                        XmlSerializer serializer = new XmlSerializer(typeof(T));
-                        using (StringReader reader = new StringReader(BodyString)) { Body = (T)serializer.Deserialize(reader); }
-                    }
-                }
-                catch { Body = null; }
-
-                Header = client.ResponseHeaders;
-            }
+            string requestBody = "<fileCopy source=\"" + filePrefix + copiedFileId + "\">";
+            requestBody += "<displayName>" + displayName + "</displayName>";
+            requestBody += "</fileCopy>";
+            return new SugarSyncResponseByPostOrPutMethod<object>(this, folderPrefix + folderId, requestBody)
+                .Header != null;
         }
-    }
 
-    /// <summary> HTTPサーバーにPOSTメソッド(GETリクエスト)でXMLを送信して、そのレスポンスを格納します？ </summary>
-    /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
-    public class HttpResponseByPostMethod<T> where T : class, new()
-    {
-        public WebHeaderCollection Header { get; private set; }
-        public T Body { get; private set; }
-        public string BodyString { get; private set; }
 
-        /// <summary>  </summary>
-        /// <param name="wrapper"></param>
-        /// <param name="url"></param>
-        /// <param name="requestBody"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
-        public HttpResponseByPostMethod(SugarsyncApiWrapper wrapper, string url, Object requestBody)
-        {
-            if (wrapper.Expiration < DateTime.Now) { return; }
-            
-            //リクエストボディの文字列化
-            //string head = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"; //<?xml version="1.0" encoding="UTF-8" ?>
-            StringBuilder requestBodyBuilder = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
-            try
-            {
-                Type requestBodyType = requestBody.GetType();
-                if (requestBodyType == typeof(string)) { requestBodyBuilder.Append((string)requestBody); }
-                else if (requestBodyType == typeof(XDocument)) 
-                {
-                    //XDocument document = (XDocument)requestBody;
-                    //requestBodyBuilder.Append(document.Declaration.ToString());
-                    requestBodyBuilder.Append(((XDocument)requestBody).ToString());
-                }
-                else if (requestBodyType == typeof(XmlDocument)) 
-                {
-                    requestBodyBuilder.Append(((XmlDocument)requestBody).OuterXml);
-
-                    //using (MemoryStream stream = new MemoryStream())
-                    //{
-                    //    XmlWriterSettings settings = new XmlWriterSettings();
-                    //    settings
-                    //    using (XmlWriter writer = XmlWriter.Create(stream, settings)) { }
-                    //}
-                    //using (StringWriterUTF8 writer = new StringWriterUTF8(requestBodyBuilder)) { }
-                }
-                else
-                {
-                    //最初に宣言を入れるには?
-                    XmlSerializer serializer = new XmlSerializer(requestBodyType);
-                    using (StringWriter writer = new StringWriter(requestBodyBuilder)) { serializer.Serialize(writer, requestBody); }
-                }
-            }
-            catch { return; }
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = System.Text.Encoding.UTF8;
-                client.Headers.Add("Authorization", wrapper.Authorization);
-                client.Headers.Add("Content-Type", "application/xml");
-
-                BodyString = client.UploadString(url, requestBodyBuilder.ToString());
-
-                try
-                {
-                    if (typeof(T) == typeof(XmlDocument))
-                    {
-                        XmlDocument xmlDocument = new XmlDocument();
-                        xmlDocument.LoadXml(BodyString);
-                        Body = xmlDocument as T;
-                    }
-                    else if (typeof(T) == typeof(XDocument))
-                    {
-                        Body = XDocument.Parse(BodyString) as T;
-                    }
-                    else
-                    {
-                        XmlSerializer serializer = new XmlSerializer(typeof(T));
-                        using (StringReader reader = new StringReader(BodyString)) { Body = (T)serializer.Deserialize(reader); }
-                    }
-                }
-                catch { Body = null; }
-
-                Header = client.ResponseHeaders;
-            }
-        }
     }
 }

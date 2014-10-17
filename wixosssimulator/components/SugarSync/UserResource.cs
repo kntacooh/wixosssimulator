@@ -21,6 +21,8 @@ namespace WixossSimulator.SugarSync
             public long Usage { get; set; }
         }
 
+
+
         /// <summary> The user's name or email address. </summary>
         [XmlElement("username")]
         public string Username { get; set; }

@@ -37,6 +37,8 @@ namespace WixossSimulator.SugarSync
             public string ContentsUrl { get; set; }
         }
 
+
+
         [XmlAttribute("end")]
         public long End { get; set; }
 

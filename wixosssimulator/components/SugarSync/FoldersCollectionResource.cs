@@ -59,17 +59,19 @@ namespace WixossSimulator.SugarSync
             public DateTime? LastModified { get; set; }
 
             /// <summary> The media type of the file, such as image/jpeg. </summary>
-            [XmlAttribute("mediaType")]
+            [XmlElement("mediaType")]
             public string MediaType { get; set; }
 
             /// <summary> Whether the file is on the server (true) or not (false). </summary>
-            [XmlAttribute("presentOnServer")]
+            [XmlElement("presentOnServer")]
             public bool PresentOnServer { get; set; }
 
             /// <summary> A link to the data for the file. </summary>
-            [XmlAttribute("fileData")]
+            [XmlElement("fileData")]
             public string FileData { get; set; }
         }
+
+
 
         [XmlAttribute("end")]
         public long End { get; set; }
