@@ -14,7 +14,7 @@ using System.Xml.Serialization; //XmlSerializer
 using System.Text; //StringBuilder
 using System.Collections.Specialized; //NameValueCollection
 
-namespace WixossSimulator.SugarSync
+namespace WixossSimulator.SugarSync.Deleted
 {
     public class SugarSyncResponse<T> where T : class, new()
     {

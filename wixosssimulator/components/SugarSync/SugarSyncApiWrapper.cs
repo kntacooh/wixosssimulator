@@ -66,42 +66,42 @@ namespace WixossSimulator.SugarSync
             userId = -1;
         }
 
-        /// <summary>
-        /// APIを通してユーザーのリソースにアクセスするための認証を行います。
-        /// (ここで作成されるアクセストークンの有効期限は1時間)
-        /// https://www.sugarsync.com/dev/api/method/create-auth-token.html
-        /// </summary>
-        /// <returns></returns>
-        [Obsolete]
-        public bool CreateAccessToken()
-        {
-            string tokenAuthRequest;
-            using (System.Net.WebClient client = new System.Net.WebClient())
-            {
-                try { tokenAuthRequest = client.DownloadString("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"); }
-                catch { tokenAuthRequest = null; }
-            }
-            if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
+        ///// <summary>
+        ///// APIを通してユーザーのリソースにアクセスするための認証を行います。
+        ///// (ここで作成されるアクセストークンの有効期限は1時間)
+        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
+        ///// </summary>
+        ///// <returns></returns>
+        //[Obsolete]
+        //public bool CreateAccessToken()
+        //{
+        //    string tokenAuthRequest;
+        //    using (System.Net.WebClient client = new System.Net.WebClient())
+        //    {
+        //        try { tokenAuthRequest = client.DownloadString("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"); }
+        //        catch { tokenAuthRequest = null; }
+        //    }
+        //    if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
 
-            try
-            {
-                Expiration = DateTime.MaxValue;
-                var response = new SugarSyncResponseByPostOrPutMethod<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
+        //    try
+        //    {
+        //        Expiration = DateTime.MaxValue;
+        //        var response = new SugarSyncResponseByPostOrPutMethod<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
 
-                Expiration = response.Body.Expiration;
-                authorization = response.Header["Location"];
-                userId = response.Body.UserId;
-            }
-            catch
-            {
-                Expiration = DateTime.MinValue;
-                authorization = null;
-                userId = -1;
-                return false;
-            }
+        //        Expiration = response.Body.Expiration;
+        //        authorization = response.Header["Location"];
+        //        userId = response.Body.UserId;
+        //    }
+        //    catch
+        //    {
+        //        Expiration = DateTime.MinValue;
+        //        authorization = null;
+        //        userId = -1;
+        //        return false;
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
         protected async Task<string> GetTokenAuthRequest()
         {
@@ -135,7 +135,7 @@ namespace WixossSimulator.SugarSync
 
             try
             {
-                var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, new Uri("https://api.sugarsync.com/authorization"), tokenAuthRequest);
+                var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
 
                 Expiration = response.Body.Expiration;
                 authorization = response.Headers.Location.AbsoluteUri;
@@ -171,7 +171,7 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<WorkspacesCollectionResource>> RetrieveWorkspacesCollectionAsync()
         {
-            return await SugarSyncHttpClient.GetAsync<WorkspacesCollectionResource>(this, new Uri(userUrl + "/workspaces/contents"));
+            return await SugarSyncHttpClient.GetAsync<WorkspacesCollectionResource>(this, userUrl + "/workspaces/contents");
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<WorkspaceResource>> RetrieveWorkspaceInformationAsync(string workspaceId)
         {
-            return await SugarSyncHttpClient.GetAsync<WorkspaceResource>(this, new Uri(getWorkspaceUrl(workspaceId)));
+            return await SugarSyncHttpClient.GetAsync<WorkspaceResource>(this, getWorkspaceUrl(workspaceId));
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<FoldersCollectionResource>> RetrieveWorkspaceContentsAsync(string workspaceId)
         {
-            return await SugarSyncHttpClient.GetAsync<FoldersCollectionResource>(this, new Uri(getWorkspaceUrl(workspaceId) + "/contents"));
+            return await SugarSyncHttpClient.GetAsync<FoldersCollectionResource>(this, getWorkspaceUrl(workspaceId) + "/contents");
         }
 
         /// <summary>
@@ -202,11 +202,11 @@ namespace WixossSimulator.SugarSync
         /// </summary>
         /// <param name="workspaceResource"> 更新されたWorkspaceを示すクラス。 </param>
         /// <returns></returns>
-        public bool UpdateWorkspaceInformation(WorkspaceResource workspaceResource)
+        public async Task<bool> UpdateWorkspaceInformationAsync(WorkspaceResource workspaceResource)
         {
             string workspaceId = workspaceResource.Dsid.Replace("/sc/" + userId.ToString() + "/", "");
-            return new SugarSyncResponseByPostOrPutMethod<object>(this, workspacePrefix + workspaceId, workspaceResource)
-                .Header != null;
+            return (int)(await SugarSyncHttpClient.PutXmlAsync(this, getWorkspaceUrl(workspaceId), workspaceResource))
+                .StatusCode / 100 == 2;
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<FolderResource>> RetrieveFolderInformationAsync(string folderId)
         {
-            return await SugarSyncHttpClient.GetAsync<FolderResource>(this, new Uri(getFolderUrl(folderId)));
+            return await SugarSyncHttpClient.GetAsync<FolderResource>(this, getFolderUrl(folderId));
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace WixossSimulator.SugarSync
             string request = "<folder><displayName>" + displayName + "</displayName></folder>";
             //var statusCode = (await SugarSyncHttpClient.PostXmlAsync<object>(this, new Uri(getFolderUrl(folderId)), requestBody)).StatusCode;
             //return (int)statusCode / 100 == 2;
-            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, new Uri(getFolderUrl(folderId)), request))
+            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, getFolderUrl(folderId), request))
                 .StatusCode / 100 == 2;
         }
 
@@ -346,7 +346,7 @@ namespace WixossSimulator.SugarSync
             string request = "<file><displayName>" + displayName + "</displayName>";
             if (!string.IsNullOrWhiteSpace(mediaType)) { request += "<mediaType>" + mediaType + "</mediaType>"; }
             request += "</file>";
-            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, new Uri(getFolderUrl(folderId)), request))
+            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, getFolderUrl(folderId), request))
                 .StatusCode / 100 == 2;
 
         }
@@ -364,7 +364,7 @@ namespace WixossSimulator.SugarSync
             string request = "<fileCopy source=\"" + getFileUrl(copiedFileId) + "\">";
             request += "<displayName>" + displayName + "</displayName>";
             request += "</fileCopy>";
-            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, new Uri(getFolderUrl(folderId)), request))
+            return (int)(await SugarSyncHttpClient.PostXmlAsync(this, getFolderUrl(folderId), request))
                 .StatusCode / 100 == 2;
         }
 
