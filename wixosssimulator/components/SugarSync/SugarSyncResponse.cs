@@ -49,45 +49,45 @@ namespace WixossSimulator.SugarSync
         }
     }
 
-    /// <summary> HTTPサーバーにGETメソッド(GETリクエスト)でデータを送信して、そのレスポンスを格納します？ </summary>
-    /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
-    public class SugarSyncResponseByGetMethod<T> : SugarSyncResponse<T> where T : class, new()
-    {
-        /// <summary>  </summary>
-        /// <param name="wrapper">  </param>
-        /// <param name="url">  </param>
-        public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url) : this(wrapper, url, new NameValueCollection()) { }
+    ///// <summary> HTTPサーバーにGETメソッド(GETリクエスト)でデータを送信して、そのレスポンスを格納します？ </summary>
+    ///// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+    //public class SugarSyncResponseByGetMethod<T> : SugarSyncResponse<T> where T : class, new()
+    //{
+    //    /// <summary>  </summary>
+    //    /// <param name="wrapper">  </param>
+    //    /// <param name="url">  </param>
+    //    public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url) : this(wrapper, url, new NameValueCollection()) { }
 
-        /// <summary>  </summary>
-        /// <param name="wrapper">  </param>
-        /// <param name="url">  </param>
-        /// <param name="getQuery">  </param>
-        public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url, NameValueCollection getQuery)
-            : base(wrapper)
-        {
-            if (wrapper.Expiration < DateTime.Now) { return; }
+    //    /// <summary>  </summary>
+    //    /// <param name="wrapper">  </param>
+    //    /// <param name="url">  </param>
+    //    /// <param name="getQuery">  </param>
+    //    public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url, NameValueCollection getQuery)
+    //        : base(wrapper)
+    //    {
+    //        if (wrapper.Expiration < DateTime.Now) { return; }
 
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = System.Text.Encoding.UTF8;
-                client.Headers.Add("Authorization", wrapper.authorization);
-                client.QueryString = getQuery;
+    //        using (WebClient client = new WebClient())
+    //        {
+    //            client.Encoding = System.Text.Encoding.UTF8;
+    //            client.Headers.Add("Authorization", wrapper.authorization);
+    //            client.QueryString = getQuery;
 
-                try { BodyString = client.DownloadString(url); }
-                catch (WebException e)
-                {
-                    BodyString = null;
-                    //HttpWebResponse r = (HttpWebResponse)e.Response;
-                    //BodyString = r.StatusCode.ToString() + " " + r.StatusDescription;
-                    return;
-                }
+    //            try { BodyString = client.DownloadString(url); }
+    //            catch (WebException e)
+    //            {
+    //                BodyString = null;
+    //                //HttpWebResponse r = (HttpWebResponse)e.Response;
+    //                //BodyString = r.StatusCode.ToString() + " " + r.StatusDescription;
+    //                return;
+    //            }
 
-                SetBodyFromBodyString();
+    //            SetBodyFromBodyString();
 
-                Header = client.ResponseHeaders;
-            }
-        }
-    }
+    //            Header = client.ResponseHeaders;
+    //        }
+    //    }
+    //}
 
     /// <summary> HTTPサーバーにPOSTメソッド(POSTリクエスト)でXMLを送信して、そのレスポンスを格納します？ </summary>
     /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>

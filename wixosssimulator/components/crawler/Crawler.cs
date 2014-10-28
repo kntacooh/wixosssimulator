@@ -154,7 +154,8 @@ namespace WixossSimulator.Crawling
         public async Task Testing()
         {
             SugarSyncApiWrapper sugarsync = new SugarSyncApiWrapper();
-            if (!sugarsync.CreateAccessToken())
+            //if (!sugarsync.CreateAccessToken())
+            if (!await sugarsync.CreateAccessTokenAsync())
             {
                 Clients.Caller.SetProgressPrimary(1, "アクセストークンを取得できませんでした。");
                 return;
@@ -234,45 +235,46 @@ namespace WixossSimulator.Crawling
 
             //Clients.Caller.SetProgressPrimary(1, result);
 
-            //var result01 = sugarsync.RetrieveUserInformation();
-            //result += "----- 1. " + result01.BodyString;
-            //var result02 = sugarsync.RetrieveSyncFoldersCollection();
-            //result += "----- 2. " + result02.BodyString;
-            //var result03 = sugarsync.RetrieveFolders(folder0);
-            //result += "----- 3. " + result03.BodyString;
-            //var result04 = sugarsync.RetrieveFolderInformation(folder0);
-            //result += "----- 4. " + result04.BodyString;
-            //var result05 = sugarsync.RetrieveFolderContents(folder0, RetrievingFolderType.None, 5, 10, RetrievingFolderOrder.LastModified);
-            //result += "----- 5. " + result05.BodyString;
-            //var result06 = sugarsync.RetrieveFolderContents(folder0, RetrievingFolderType.File, 5, 10, RetrievingFolderOrder.LastModified);
-            //result += "----- 6. " + result06.BodyString;
-
-            string folder0 = "";
-            //var result01 = await sugarsync.RetrieveUserInformationAsync();
+            //string folder0 = "";
+            var result01 = await sugarsync.RetrieveUserInformationAsync();
             //var result02 = await sugarsync.RetrieveSyncFoldersCollectionAsync();
             //var result03 = await sugarsync.RetrieveFoldersAsync(folder0);
             //var result04 = await sugarsync.RetrieveFolderInformationAsync(folder0);
-            var result05 = await sugarsync.RetrieveFolderContentsAsync(folder0, RetrievingFolderType.None, 5, 10, RetrievingFolderOrder.LastModified);
-            var result06 = await sugarsync.RetrieveFolderContentsAsync(folder0, RetrievingFolderType.File, 5, 10, RetrievingFolderOrder.LastModified);
-            //result += "----- 1. " + result01.BodyString;
+            //var result05 = await sugarsync.RetrieveFolderContentsAsync(folder0, RetrievingFolderType.None, 5, 10, RetrievingFolderOrder.LastModified);
+            //var result06 = await sugarsync.RetrieveFolderContentsAsync(folder0, RetrievingFolderType.File, 5, 10, RetrievingFolderOrder.LastModified);
+            result += "----- 1. " + result01.BodyString;
             //result += "----- 2. " + result02.BodyString;
             //result += "----- 3. " + result03.BodyString;
             //result += "----- 4. " + result04.BodyString;
-            result += "----- 5. " + result05.BodyString;
-            result += "----- 6. " + result06.BodyString;
+            //result += "----- 5. " + result05.BodyString;
+            //result += "----- 6. " + result06.BodyString;
 
-            string folder1 = "";
-            string file1 = "";
-            //var result11 = s.CreateFolder(folder1, "testFolder2");
-            //result += "----- 1. " + result11.ToString();
-            //var result12 = s.CreateFile(folder1, "test03.txt", "text/plain");
-            //result += "----- 2. " + result12.ToString();
-            //var result13 = s.CopyFile(folder1, file1, "copy02.png");
-            //result += "----- 3. " + result13.ToString();
-            //var result15 = s.CopyFile(folder1, file1, "copy01.png");
-            //result += "----- 5. " + result15.ToString();
-            var result16 = sugarsync.RetrieveFolderContents(folder1);
-            result += "----- 6. " + result16.BodyString;
+            //string folderId1 = "";
+            //string fileId1 = "";
+            //var result11 = await sugarsync.CreateFolderAsync(folderId1, "testFolder2");
+            //var result12 = await sugarsync.CreateFileAsync(folderId1, "test03.txt", "text/plain");
+            //var result13 = await sugarsync.CopyFileAsync(folderId1, fileId1, "copy02.png");
+            //var result14 = await sugarsync.CopyFileAsync(folderId1, fileId1, "copy01.png");
+            //var result15 = await sugarsync.RetrieveFolderContentsAsync(folderId1);
+            //result += "----- 11. " + result11.ToString();
+            //result += "----- 12. " + result12.ToString();
+            //result += "----- 13. " + result13.ToString();
+            //result += "----- 14. " + result14.ToString();
+            //result += "----- 15. " + result15.BodyString;
+
+            //string folderId2 = "";
+            //string fileId2 = "";
+            //var result21 = await sugarsync.CreateFolderAsync(folderId2, "testFolder3");
+            //var result12 = await sugarsync.CreateFileAsync(folderId1, "test03.txt", "text/plain");
+            //var result13 = await sugarsync.CopyFileAsync(folderId1, fileId1, "copy02.png");
+            //var result14 = await sugarsync.CopyFileAsync(folderId1, fileId1, "copy01.png");
+            //var result15 = await sugarsync.RetrieveFolderContentsAsync(folderId1);
+            //result += "----- 11. " + result21.ToString();
+            //result += "----- 12. " + result12.ToString();
+            //result += "----- 13. " + result13.ToString();
+            //result += "----- 14. " + result14.ToString();
+            //result += "----- 15. " + result15.BodyString;
+
             Clients.Caller.SetProgressPrimary(1, result);
         }
 
