@@ -3,7 +3,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace wixosssimulatorTest.components.crawler
+namespace wixosssimulatorTest.components.Crawler
 {
     [TestClass]
     public class WebCrawlerTest

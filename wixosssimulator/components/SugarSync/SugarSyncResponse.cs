@@ -5,11 +5,13 @@ using System.Web;
 
 using System.Net; //Web~
 using System.IO; //Stream(Reader/Writer)
-using System.Text; //StringBuilder
+using System.Net.Http; //HttpClient
 
 using System.Xml; //XmlDocument
 using System.Xml.Linq; //XDocument
 using System.Xml.Serialization; //XmlSerializer
+
+using System.Text; //StringBuilder
 using System.Collections.Specialized; //NameValueCollection
 
 namespace WixossSimulator.SugarSync
@@ -20,7 +22,7 @@ namespace WixossSimulator.SugarSync
         public T Body { get; protected set; }
         public string BodyString { get; protected set; }
 
-        protected SugarSyncResponse(SugarsyncApiWrapper wrapper)
+        protected SugarSyncResponse(SugarSyncApiWrapper wrapper)
         {
             //if (wrapper.Expiration < DateTime.Now) { return; }
         }
@@ -54,13 +56,13 @@ namespace WixossSimulator.SugarSync
         /// <summary>  </summary>
         /// <param name="wrapper">  </param>
         /// <param name="url">  </param>
-        public SugarSyncResponseByGetMethod(SugarsyncApiWrapper wrapper, string url) : this(wrapper, url, new NameValueCollection()) { }
+        public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url) : this(wrapper, url, new NameValueCollection()) { }
 
         /// <summary>  </summary>
         /// <param name="wrapper">  </param>
         /// <param name="url">  </param>
         /// <param name="getQuery">  </param>
-        public SugarSyncResponseByGetMethod(SugarsyncApiWrapper wrapper, string url, NameValueCollection getQuery)
+        public SugarSyncResponseByGetMethod(SugarSyncApiWrapper wrapper, string url, NameValueCollection getQuery)
             : base(wrapper)
         {
             if (wrapper.Expiration < DateTime.Now) { return; }
@@ -91,13 +93,13 @@ namespace WixossSimulator.SugarSync
     /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
     public class SugarSyncResponseByPostOrPutMethod<T> : SugarSyncResponse<T> where T : class, new()
     {
-        protected SugarSyncResponseByPostOrPutMethod(SugarsyncApiWrapper wrapper) : base(wrapper) { }
+        protected SugarSyncResponseByPostOrPutMethod(SugarSyncApiWrapper wrapper) : base(wrapper) { }
 
         /// <summary>  </summary>
         /// <param name="wrapper">  </param>
         /// <param name="url">  </param>
         /// <param name="requestBody"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
-        public SugarSyncResponseByPostOrPutMethod(SugarsyncApiWrapper wrapper, string url, object requestBody)
+        public SugarSyncResponseByPostOrPutMethod(SugarSyncApiWrapper wrapper, string url, object requestBody)
             : base(wrapper)
         {
             if (wrapper.Expiration < DateTime.Now) { return; }

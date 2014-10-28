@@ -3,7 +3,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace wixosssimulatorTest.components.card
+namespace wixosssimulatorTest.components.Card
 {
     [TestClass]
     public class LrigTypeTest

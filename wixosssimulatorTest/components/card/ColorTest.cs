@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System.Collections.Generic;
 
-namespace wixosssimulatorTest.components.card
+namespace wixosssimulatorTest.components.Card
 {
     [TestClass]
     public class ColorTest

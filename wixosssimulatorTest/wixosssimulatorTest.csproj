@@ -50,12 +50,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="components\card\ClassTest.cs" />
-    <Compile Include="components\card\ColorTest.cs" />
-    <Compile Include="components\card\CostTest.cs" />
-    <Compile Include="components\card\LrigTypeTest.cs" />
-    <Compile Include="components\card\RarityTest.cs" />
-    <Compile Include="components\crawler\WebCrawlerTest.cs" />
+    <Compile Include="components\Card\ClassTest.cs" />
+    <Compile Include="components\Card\ColorTest.cs" />
+    <Compile Include="components\Card\CostTest.cs" />
+    <Compile Include="components\Card\LrigTypeTest.cs" />
+    <Compile Include="components\Card\RarityTest.cs" />
+    <Compile Include="components\Crawler\WebCrawlerTest.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
