@@ -5,7 +5,6 @@ using System.Web;
 
 using System.Threading.Tasks; //Task
 
-//using System.Net; //Web~
 using System.IO; //Stream(Reader/Writer)
 using System.Net.Http; //HttpClient
 using System.Net.Http.Headers; //AuthenticationHeaderValue
@@ -21,88 +20,78 @@ namespace WixossSimulator.SugarSync
 {
     using System.Net;
 
+    /// <summary> HTTPサーバーと SugarSync API を使って通信を行うためのメソッドを提供します? </summary>
     public class SugarSyncHttpClient
     {
+        /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> GetAsync(SugarSyncApiWrapper wrapper, string address)
         {
             return await GetAsync(wrapper, new Uri(address)); 
         }
+        /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> GetAsync(SugarSyncApiWrapper wrapper, Uri uri) 
         {
             return await GetAsync<object>(wrapper, uri); 
         }
+        /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> GetAsync<T>(SugarSyncApiWrapper wrapper, string address) where T : class,new()
         {
             return await GetAsync<T>(wrapper, new Uri(address)); 
         }
+        /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> GetAsync<T>(SugarSyncApiWrapper wrapper, Uri uri) where T : class,new()
         {
             using (HttpClient client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.GetAsync(uri)); }
-
-            //if (wrapper.Expiration < DateTime.Now) { return null; }
-
-            //using (var client = AllocateClient(wrapper.authorization))
-            //{
-            //    using (var response = await client.GetAsync(uri))
-            //    using (var content = response.Content)
-            //    {
-            //        return new SugarSyncHttpResponse<T>(
-            //            response.Headers, await content.ReadAsStringAsync(), response.StatusCode);
-            //    }
-            //}
-            
-            //using (HttpClient client = new HttpClient())
-            //{
-            //    return await ConnectAsync<T>(wrapper, client, async () => await client.GetAsync(uri));
-
-            //    client.MaxResponseContentBufferSize = 1000000;
-
-            //    client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.authorization);
-            //    //これはエラー //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(wrapper.authorization);
-
-            //    client.DefaultRequestHeaders.AcceptCharset.Add(StringWithQualityHeaderValue.Parse("UTF-8"));
-            //    //client.DefaultRequestHeaders.Add("Accept-Charset", "UTF-8");
-
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 6.3; Win64; x64)"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppleWebKit", "537.36"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(KHTML, like Gecko)"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "37.0.2062.124"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Safari", "537.36"));
-
-            //    //client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mosilla", "5.0"));
-            //    //client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 6.3; Trident/7.0; rv:11.0)"));
-            //    //client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("like Gecko"));
-
-            //    //client.DefaultRequestHeaders.UserAgent.Add(ProductInfoHeaderValue.Parse("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"));
-            //    //client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko");
-            //    //client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko");
-
-            //    using (var response = await client.GetAsync(uri))
-            //    using (var content = response.Content)
-            //    {
-            //        //var header = response.Headers;
-            //        //var body = await content.ReadAsStringAsync();
-            //        //var statusCode = response.StatusCode;
-            //        //return new SugarSyncHttpResponse<T>(header, body, statusCode);
-            //        return new SugarSyncHttpResponse<T>(
-            //            response.Headers, await content.ReadAsStringAsync(), response.StatusCode);
-            //    }
-            //}
         }
 
+        /// <summary> HTTPサーバーに、内容がXMLである POST 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> PostXmlAsync(SugarSyncApiWrapper wrapper, string address, object request) 
         {
             return await PostXmlAsync(wrapper, new Uri(address), request); 
         }
+        /// <summary> HTTPサーバーに、内容がXMLである POST 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> PostXmlAsync(SugarSyncApiWrapper wrapper, Uri uri, object request) 
         {
             return await PostXmlAsync<object>(wrapper, uri, request); 
         }
+        /// <summary> HTTPサーバーに、内容がXMLである POST 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> PostXmlAsync<T>(SugarSyncApiWrapper wrapper, string address, object request) where T : class,new() 
         {
             return await PostXmlAsync<T>(wrapper, new Uri(address), request);
         }
+        /// <summary> HTTPサーバーに、内容がXMLである POST 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> PostXmlAsync<T>(SugarSyncApiWrapper wrapper, Uri uri, object request) where T : class,new()
         {
             //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/xml");
@@ -113,69 +102,42 @@ namespace WixossSimulator.SugarSync
 
             using (var client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.PostAsync(uri, requestXml)); }
 
-            //if (wrapper.Expiration < DateTime.Now) { return null; }
-
-            //using (var client = new HttpClient())
-            //{
-            //    AllocateClient(client, wrapper.authorization);
-
-            //    //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/xml");
-            //    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            //    var requestXml = new StringContent(FormatRequestXml(request));
-            //    requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
-            //    requestXml.Headers.ContentType.CharSet = "UTF-8";
-
-            //    using (var response = await client.PostAsync(uri, requestXml))
-            //    using (var content = response.Content)
-            //    {
-            //        return new SugarSyncHttpResponse<T>(
-            //            response.Headers, await content.ReadAsStringAsync(), response.StatusCode);
-            //    }
-            //}
-
-            //using (HttpClient client = new HttpClient())
-            //{
-            //    client.MaxResponseContentBufferSize = 1000000;
-
-            //    client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.authorization);
-
-            //    client.DefaultRequestHeaders.AcceptCharset.Add(StringWithQualityHeaderValue.Parse("UTF-8"));
-
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 6.3; Win64; x64)"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AppleWebKit", "537.36"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(KHTML, like Gecko)"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "37.0.2062.124"));
-            //    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Safari", "537.36"));
-
-            //    //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/xml");
-            //    //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-            //    var requestXml = new StringContent(FormatRequestXml(request));
-            //    requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
-            //    requestXml.Headers.ContentType.CharSet = "UTF-8";
-
-            //    using (var response = await client.PostAsync(uri, requestXml))
-            //    using (var content = response.Content)
-            //    {
-
-            //        return new SugarSyncHttpResponse<T>(
-            //            response.Headers, await content.ReadAsStringAsync(), response.StatusCode);
-            //    }
-            //}
         }
 
+        /// <summary> HTTPサーバーに、内容がXMLである PUT 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> PutXmlAsync(SugarSyncApiWrapper wrapper, string address, object request)
         {
             return await PutXmlAsync(wrapper, new Uri(address), request);
         }
+        /// <summary> HTTPサーバーに、内容がXMLである PUT 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse> PutXmlAsync(SugarSyncApiWrapper wrapper, Uri uri, object request)
         {
             return await PutXmlAsync<object>(wrapper, uri, request);
         }
+        /// <summary> HTTPサーバーに、内容がXMLである PUT 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> PutXmlAsync<T>(SugarSyncApiWrapper wrapper, string address, object request) where T : class,new()
         {
             return await PutXmlAsync<T>(wrapper, new Uri(address), request);
         }
+        /// <summary> HTTPサーバーに、内容がXMLである PUT 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <param name="request"> XML宣言を含まないリクエストボディを表すオブジェクト。 </param>
+        /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> PutXmlAsync<T>(SugarSyncApiWrapper wrapper, Uri uri, object request) where T : class,new()
         {
             var requestXml = new StringContent(FormatRequestXml(request));
@@ -183,9 +145,14 @@ namespace WixossSimulator.SugarSync
             requestXml.Headers.ContentType.CharSet = "UTF-8";
 
             using (var client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.PutAsync(uri, requestXml)); }
-
         }
 
+        /// <summary> HTTPサーバーに、HTTP 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="client"> 接続に使用するHttpClient。 </param>
+        /// <param name="connectingMethod"> HTTP要求を示すメソッド。 </param>
+        /// <returns></returns>
         protected static async Task<SugarSyncHttpResponse<T>> ConnectAsync<T>(
             SugarSyncApiWrapper wrapper, HttpClient client, Func<Task<HttpResponseMessage>> connectingMethod) where T : class,new()
         {
@@ -251,6 +218,7 @@ namespace WixossSimulator.SugarSync
         }
     }
 
+    /// <summary> SugarSync API のレスポンスを格納するクラス? </summary>
     public class SugarSyncHttpResponse
     {
         public HttpResponseHeaders Headers { get; protected set; }
@@ -265,6 +233,8 @@ namespace WixossSimulator.SugarSync
         }
     }
 
+    /// <summary> SugarSync API のレスポンスを格納するクラス? </summary>
+    /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
     public class SugarSyncHttpResponse<T> : SugarSyncHttpResponse where T : class, new()
     {
         public T Body { get; private set; }

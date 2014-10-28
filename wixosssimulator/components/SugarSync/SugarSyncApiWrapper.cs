@@ -15,7 +15,6 @@ using System.Collections.Specialized; //NameValueCollection
 //using System.Xml; //XmlDocument
 //using System.Xml.Linq; //XDocument
 //using System.Xml.Serialization; //XmlSerializer
-//using DropNet;
 
 namespace WixossSimulator.SugarSync
 {
@@ -26,11 +25,6 @@ namespace WixossSimulator.SugarSync
     /// <summary> WixossSimulator のための SugarSync API のラッパーを提供します？ </summary>
     public class SugarSyncApiWrapper
     {
-        private string userPrefix { get { return "https://api.sugarsync.com/user/" + userId.ToString(); } }
-        private string workspacePrefix { get { return "https://api.sugarsync.com/workspace/:sc:" + userId.ToString() + ":"; } }
-        private string folderPrefix { get { return "https://api.sugarsync.com/folder/:sc:" + userId.ToString() + ":"; } }
-        private string filePrefix { get { return "https://api.sugarsync.com/file/:sc:" + userId.ToString() + ":"; } }
-
         /// <summary> ユーザーを示すアドレスを取得します。 </summary>
         /// <returns></returns>
         protected string userUrl { get { return "https://api.sugarsync.com/user/" + userId.ToString(); } }
@@ -65,43 +59,6 @@ namespace WixossSimulator.SugarSync
             authorization = null;
             userId = -1;
         }
-
-        ///// <summary>
-        ///// APIを通してユーザーのリソースにアクセスするための認証を行います。
-        ///// (ここで作成されるアクセストークンの有効期限は1時間)
-        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
-        ///// </summary>
-        ///// <returns></returns>
-        //[Obsolete]
-        //public bool CreateAccessToken()
-        //{
-        //    string tokenAuthRequest;
-        //    using (System.Net.WebClient client = new System.Net.WebClient())
-        //    {
-        //        try { tokenAuthRequest = client.DownloadString("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"); }
-        //        catch { tokenAuthRequest = null; }
-        //    }
-        //    if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
-
-        //    try
-        //    {
-        //        Expiration = DateTime.MaxValue;
-        //        var response = new SugarSyncResponseByPostOrPutMethod<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
-
-        //        Expiration = response.Body.Expiration;
-        //        authorization = response.Header["Location"];
-        //        userId = response.Body.UserId;
-        //    }
-        //    catch
-        //    {
-        //        Expiration = DateTime.MinValue;
-        //        authorization = null;
-        //        userId = -1;
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
 
         protected async Task<string> GetTokenAuthRequest()
         {
@@ -156,7 +113,6 @@ namespace WixossSimulator.SugarSync
         /// SugarSyncユーザーについての情報を取得します。
         /// https://www.sugarsync.com/dev/api/method/get-user-info.html
         /// </summary>
-        /// <param name="userId"> ユーザーID。 </param>
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<UserResource>> RetrieveUserInformationAsync()
         {
@@ -167,7 +123,6 @@ namespace WixossSimulator.SugarSync
         /// ユーザーのアカウント中にあるWorkspaceについての情報を取得します。
         /// https://www.sugarsync.com/dev/api/method/get-workspaces.html
         /// </summary>
-        /// <param name="userId"> ユーザーID。 </param>
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<WorkspacesCollectionResource>> RetrieveWorkspacesCollectionAsync()
         {
@@ -327,8 +282,6 @@ namespace WixossSimulator.SugarSync
         public async Task<bool> CreateFolderAsync(string folderId, string displayName)
         {
             string request = "<folder><displayName>" + displayName + "</displayName></folder>";
-            //var statusCode = (await SugarSyncHttpClient.PostXmlAsync<object>(this, new Uri(getFolderUrl(folderId)), requestBody)).StatusCode;
-            //return (int)statusCode / 100 == 2;
             return (int)(await SugarSyncHttpClient.PostXmlAsync(this, getFolderUrl(folderId), request))
                 .StatusCode / 100 == 2;
         }
