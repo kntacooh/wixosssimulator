@@ -7,11 +7,16 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/user-resource.html </summary>
+    /// <summary>
+    /// A user resource represents information about a SugarSync user,
+    /// including: user name, current storage utilization, a list of the user's workspaces (computers), a list of the user's sync folders,
+    /// a list of the user's shared folders, the contacts for those shared folders, and a list of the user's photo albums.
+    /// https://www.sugarsync.com/dev/api/user-resource.html 
+    /// </summary>
     [XmlRoot("user")]
     public class UserResource
     {
-        public class UserQuota
+        public class QuotaElement
         {
             /// <summary> The total storage available to the user, in bytes. </summary>
             [XmlElement("limit")]
@@ -37,7 +42,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> The user's current storage usage. The element has the following subelements: </summary>
         [XmlElement("quota")]
-        public UserQuota Quota { get; set; }
+        public QuotaElement Quota { get; set; }
 
         /// <summary> A link to a collection listing a user's computers and devices. </summary>
         [XmlElement("workspaces")]
@@ -68,7 +73,8 @@ namespace WixossSimulator.SugarSync
         [XmlElement("webArchive")]
         public string WebArchive { get; set; }
 
-        /// <summary> A link to a collection listing the user's Mobile Photos folder.
+        /// <summary>
+        /// A link to a collection listing the user's Mobile Photos folder.
         /// The Mobile Photos folder is used to store photos (or videos) that the user uploads from a mobile device.
         /// The folder can also contain folders and other types of files if the user chooses to put them there.
         /// </summary>

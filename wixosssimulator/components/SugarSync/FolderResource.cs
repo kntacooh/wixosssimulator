@@ -7,11 +7,17 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/folder-resource.html </summary>
+    /// <summary>
+    /// A folder resource is a collection that represents a folder in a user's file system that has been selected for inclusion in the user's SugarSync account.
+    /// A folder can contain files, other folders, or both. One type of folder, called a sync folder, is a top-level folder that the user has selected for syncing by SugarSync.
+    /// A sync folder can contain other folders that are in the user's file system.
+    /// However, the folders in a sync folder are simply "folders", and not "sync folders" themselves.
+    /// https://www.sugarsync.com/dev/api/folder-resource.html 
+    /// </summary>
     [XmlRoot("folder")]
     public class FolderResource
     {
-        public class FolderResourceSharing
+        public class SharingElement
         {
             [XmlAttribute("enabled")]
             public bool Enabled { get; set; }
@@ -41,6 +47,10 @@ namespace WixossSimulator.SugarSync
         [XmlIgnore]
         public DateTime? TimeCreated { get; set; }
 
+        /// <summary> A link to the parent collection (workspace or folder) that contains the folder. </summary>
+        [XmlElement("parent")]
+        public string Parent { get; set; }
+
         /// <summary> A link to the collections contained in the folder, if any. </summary>
         [XmlElement("collections")]
         public string Collections { get; set; }
@@ -55,7 +65,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> Whether this is a shared folder (true) or not a shared folder (false). </summary>
         [XmlElement("sharing")]
-        public FolderResourceSharing Sharing { get; set; }
+        public SharingElement Sharing { get; set; }
     }
 
 }

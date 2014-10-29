@@ -9,6 +9,6 @@ namespace WixossSimulator.SugarSync
 {
     public class SugarSyncResource
     {
-        public static string TimeFormat = "yyyy-MM-ddTHH':'mm':'ss.fffzzz";
+        const string TimeFormat = "yyyy-MM-ddTHH':'mm':'ss.fffzzz";
     }
 }

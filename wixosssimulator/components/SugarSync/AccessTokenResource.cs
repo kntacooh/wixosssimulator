@@ -7,7 +7,17 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/auth-resource.html </summary>
+    //アクセスリソースは、アプリケーションがプラットフォームAPIを介して、ユーザーのアカウント内のファール、フォルダ、およびその他のリソースにアクセスすることを許可します。
+    //アクセストークンは、リフレッシュトークンを使用して取得されます。
+    //
+    //アクセストークンは、create access tokenリクエストによるレスポンス内の、レスポンスヘッダのLocationフィールド内に返されます??(いやこれでいいのか)
+    /// <summary>
+    /// An access resource allows an application to access files, folders, and other resources within a user's account through the Platform API.
+    /// An access token is acquired using a refresh token.
+    /// 
+    /// An access token is returned in the Location field of the response header in response to a create access token request.
+    /// https://www.sugarsync.com/dev/api/auth-resource.html
+    /// </summary>
     [XmlRoot("authorization")]
     public class AccessTokenResource
     {
@@ -27,9 +37,6 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> A link to the associated user resource. </summary>
         [XmlIgnore]
-        public long UserId
-        {
-            get { return long.Parse(User.Replace("https://api.sugarsync.com/user/", "")); }
-        }
+        public long UserId { get { return long.Parse(User.Replace("https://api.sugarsync.com/user/", "")); } }
     }
 }

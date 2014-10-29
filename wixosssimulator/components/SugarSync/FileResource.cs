@@ -7,17 +7,21 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/file-resource.html </summary>
+    //FileResourceは、特定のユーザーのファイルを表します。
+    /// <summary> 
+    /// A file resource represents a specific user file.
+    /// https://www.sugarsync.com/dev/api/file-resource.html 
+    /// </summary>
     [XmlRoot("file")]
     public class FileResource
     {
-        public class FileResourcePublicLink
+        public class PublicLinkElement
         {
             [XmlAttribute("enabled")]
             public bool Enabled { get; set; }
         }
 
-        public class FileResourceImage
+        public class ImageElement
         {
             /// <summary> The height in pixels of the image. </summary>
             [XmlElement("height")]
@@ -96,10 +100,10 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> Indicates whether a public link exists for the file (enabled="true") or no public link exists (enabled="false"). </summary>
         [XmlElement("publicLink")]
-        public FileResourcePublicLink PublicLink { get; set; }
+        public PublicLinkElement PublicLink { get; set; }
 
         /// <summary> Indicates that this is an image file. </summary>
         [XmlElement("image")]
-        public FileResourceImage Image { get; set; }
+        public ImageElement Image { get; set; }
     }
 }

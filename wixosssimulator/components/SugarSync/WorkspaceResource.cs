@@ -7,7 +7,11 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/ws-resource.html </summary>
+    /// <summary>
+    /// A workspace resource is a collection that represents a device, such as a laptop or desktop computer, in the user's SugarSync account.
+    /// A workspace can only contain sync folders. It cannot contain files or other types of collections.
+    /// https://www.sugarsync.com/dev/api/ws-resource.html 
+    /// </summary>
     [XmlRoot("workspace")]
     public class WorkspaceResource
     {

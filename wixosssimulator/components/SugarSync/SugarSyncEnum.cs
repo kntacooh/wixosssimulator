@@ -10,7 +10,7 @@ namespace WixossSimulator.SugarSync
     public static class SugarSyncEnumExtension
     {
         #region RetrievingFolderType
-        /// <summary> APIのGETメソッドで使う文字列に変換? </summary>
+        /// <summary> SugarSyncのプラットフォームAPIで使う文字列に変換? </summary>
         /// <param name="type">  </param>
         /// <returns>  </returns>
         public static string ToApiString(this RetrievingFolderType type) { return typeApiString[type]; }
@@ -25,6 +25,9 @@ namespace WixossSimulator.SugarSync
         #endregion
 
         #region RetrievingFolderOrder
+        /// <summary> SugarSyncのプラットフォームAPIで使う文字列に変換? </summary>
+        /// <param name="order"></param>
+        /// <returns></returns>
         public static string ToApiString(this RetrievingFolderOrder order) { return orderApiString[order]; }
 
         private static ReadOnlyDictionary<RetrievingFolderOrder, string> orderApiString = new ReadOnlyDictionary<RetrievingFolderOrder, string>(

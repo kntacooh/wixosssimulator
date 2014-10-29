@@ -7,11 +7,16 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/ws-list-resource.html </summary>
+    /// <summary>
+    /// A workspaces collection resource represents the list of workspaces in the user's SugarSync account.
+    /// An individual workspace is a collection that represents a device, such as a laptop or desktop computer, in the user's SugarSync account.
+    /// So a workspaces collection represents all the devices in the user's SugarSync account.
+    /// https://www.sugarsync.com/dev/api/ws-list-resource.html 
+    /// </summary>
     [XmlRoot("collectionContents")]
     public class WorkspacesCollectionResource
     {
-        public class WorkspacesCollection
+        public class CollectionElement
         {
             /// <summary> The type of the collection (workspace). </summary>
             [XmlAttribute("type")]
@@ -49,6 +54,6 @@ namespace WixossSimulator.SugarSync
         public long Start { get; set; }
 
         [XmlElement("collection")]
-        public List<WorkspacesCollection> Collection { get; set; }
+        public List<CollectionElement> Collection { get; set; }
     }
 }

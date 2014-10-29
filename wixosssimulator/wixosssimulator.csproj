@@ -130,6 +130,7 @@
   <ItemGroup>
     <Compile Include="components\Sql\CrawlingData.cs" />
     <Compile Include="components\SugarSync\AccessTokenResource.cs" />
+    <Compile Include="components\SugarSync\ReceivedShareResource.cs" />
     <Compile Include="components\SugarSync\SugarSyncEnum.cs" />
     <Compile Include="components\SugarSync\SugarSyncApiWrapper.cs" />
     <Compile Include="components\Sql\TableData.cs" />
@@ -151,7 +152,7 @@
     <Compile Include="components\SugarSync\UserResource.cs" />
     <Compile Include="components\SugarSync\WorkspaceResource.cs" />
     <Compile Include="components\SugarSync\WorkspacesCollectionResource.cs" />
-    <Compile Include="components\SugarSync\XmlResource.cs" />
+    <Compile Include="components\SugarSync\SugarSyncResource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="test\helloworld.aspx.cs">
       <DependentUpon>helloworld.aspx</DependentUpon>

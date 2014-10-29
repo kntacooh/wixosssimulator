@@ -7,30 +7,40 @@ using System.Xml.Serialization;
 
 namespace WixossSimulator.SugarSync
 {
-    /// <summary> https://www.sugarsync.com/dev/api/syncfolders-list-resource.html </summary>
+    /// <summary>
+    /// A sync folders collection resource represents the list of sync folders in the user's SugarSync account.
+    /// An individual sync folder is a top-level folder that the user has selected for syncing by SugarSync. 
+    /// A sync folder can contain other folders that are in the user's file system.
+    /// However, the folders in a sync folder are simply "folders", and not "sync folders" themselves.
+    /// https://www.sugarsync.com/dev/api/syncfolders-list-resource.html
+
+    /// A folder resource is a collection that represents a folder in a user's file system that has been selected for inclusion in the user's SugarSync account.
+    /// A folder can contain files, other folders, or both. One type of folder, called a sync folder, is a top-level folder that the user has selected for syncing by SugarSync.
+    /// https://www.sugarsync.com/dev/api/folder-resource.html
+    /// </summary>
     [XmlRoot("collectionContents")]
     public class FoldersCollectionResource
     {
-        public class FoldersCollection
+        public class CollectionElement
         {
-            /// <summary> The type of the collection (syncFolder). </summary>
+            /// <summary> The type of the collection (type="folder" or type="syncFolder"). </summary>
             [XmlAttribute("type")]
             public string collectionType { get; set; }
 
-            /// <summary> The user-visible name of the sync folder. </summary>
+            /// <summary> The user-visible name of the folder or the sync folder. </summary>
             [XmlElement("displayName")]
             public string DisplayName { get; set; }
 
-            /// <summary> A link to the sync folder. </summary>
+            /// <summary> A link to the folder or the sync folder. </summary>
             [XmlElement("ref")]
             public string ReferenceUrl { get; set; }
 
-            /// <summary> A link to the contents of the sync folder. </summary>
+            /// <summary> A link to the contents of the folder or the sync folder. </summary>
             [XmlElement("contents")]
             public string ContentsUrl { get; set; }
         }
 
-        public class FoldersCollectionFile
+        public class FileElement
         {
             /// <summary> The user-visible name of the file. </summary>
             [XmlElement("displayName")]
@@ -83,9 +93,9 @@ namespace WixossSimulator.SugarSync
         public long Start { get; set; }
 
         [XmlElement("collection")]
-        public List<FoldersCollection> Collection { get; set; }
+        public List<CollectionElement> Collection { get; set; }
 
         [XmlElement("file")]
-        public List<FoldersCollectionFile> File { get; set; }
+        public List<FileElement> File { get; set; }
     }
 }

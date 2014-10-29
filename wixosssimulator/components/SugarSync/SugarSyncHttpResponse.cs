@@ -5,7 +5,7 @@ using System.Web;
 
 using System.Threading.Tasks; //Task
 
-using System.IO; //Stream(Reader/Writer)
+using System.IO; //Stream (Reader/Writer)
 using System.Net.Http; //HttpClient
 using System.Net.Http.Headers; //AuthenticationHeaderValue
 
@@ -20,7 +20,7 @@ namespace WixossSimulator.SugarSync
 {
     using System.Net;
 
-    /// <summary> HTTPサーバーと SugarSync API を使って通信を行うためのメソッドを提供します? </summary>
+    /// <summary> SugarSyncのプラットフォームAPIを利用して、HTTPサーバーと通信を行うためのメソッドを提供します? </summary>
     public class SugarSyncHttpClient
     {
         /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
@@ -147,6 +147,41 @@ namespace WixossSimulator.SugarSync
             using (var client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.PutAsync(uri, requestXml)); }
         }
 
+        /// <summary> HTTPサーバーに DELETE 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <returns></returns>
+        public static async Task<SugarSyncHttpResponse> DeleteAsync(SugarSyncApiWrapper wrapper, string address)
+        {
+            return await DeleteAsync(wrapper, new Uri(address));
+        }
+        /// <summary> HTTPサーバーに DELETE 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <returns></returns>
+        public static async Task<SugarSyncHttpResponse> DeleteAsync(SugarSyncApiWrapper wrapper, Uri uri)
+        {
+            return await DeleteAsync<object>(wrapper, uri);
+        }
+        /// <summary> HTTPサーバーに DELETE 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="address"> 送信先のアドレス。 </param>
+        /// <returns></returns>
+        public static async Task<SugarSyncHttpResponse<T>> DeleteAsync<T>(SugarSyncApiWrapper wrapper, string address) where T : class,new()
+        {
+            return await DeleteAsync<T>(wrapper, new Uri(address));
+        }
+        /// <summary> HTTPサーバーに DELETE 要求を送信して、そのレスポンスを格納する? </summary>
+        /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
+        /// <param name="wrapper">  </param>
+        /// <param name="uri"> 送信先のURI。 </param>
+        /// <returns></returns>
+        public static async Task<SugarSyncHttpResponse<T>> DeleteAsync<T>(SugarSyncApiWrapper wrapper, Uri uri) where T : class,new()
+        {
+            using (HttpClient client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.DeleteAsync(uri)); }
+        }
+
         /// <summary> HTTPサーバーに、HTTP 要求を送信して、そのレスポンスを格納する? </summary>
         /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
         /// <param name="wrapper">  </param>
@@ -160,7 +195,7 @@ namespace WixossSimulator.SugarSync
 
             client.MaxResponseContentBufferSize = 1000000;
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.authorization);
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.Authorization);
             //これはエラー //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(wrapper.authorization);
 
             //必要?
@@ -218,27 +253,68 @@ namespace WixossSimulator.SugarSync
         }
     }
 
-    /// <summary> SugarSync API のレスポンスを格納するクラス? </summary>
+    /// <summary> SugarSyncのプラットフォームAPIにおけるサーバーからのレスポンスを格納するクラス? </summary>
     public class SugarSyncHttpResponse
     {
-        public HttpResponseHeaders Headers { get; protected set; }
-        public string BodyString { get; protected set; }
-        public HttpStatusCode StatusCode { get; protected set; }
+        private static SugarSyncHttpResponse failure = new SugarSyncHttpResponse(false);
+        private static SugarSyncHttpResponse success = new SugarSyncHttpResponse(true);
 
+        /// <summary> サーバーに要求を送る前に、失敗だと判断されるときのレスポンスを取得します。 </summary>
+        public static SugarSyncHttpResponse Failure { get { return failure; } }
+        /// <summary> サーバーに要求を送る必要がなく、成功だと判断されるときのレスポンスを取得します。 </summary>
+        public static SugarSyncHttpResponse Success { get { return success; } }
+
+        //後から書き込み可能なフィールドを作ってはいけない(上記のプロパティがあるため)
+        private HttpStatusCode statusCode;
+
+        /// <summary> レスポンスヘッダを取得します。 </summary>
+        public HttpResponseHeaders Headers { get; protected set; }
+        /// <summary> レスポンスボディの文字列として取得します。 </summary>
+        public string BodyString { get; protected set; }
+        /// <summary> レスポンスのステータスコードを取得します。 </summary>
+        public HttpStatusCode StatusCode 
+        {
+            get { return statusCode; }
+            protected set
+            {
+                statusCode = value;
+                IsSuccess = (int)StatusCode / 100 == 2;
+            }
+        }
+        /// <summary> このレスポンスが成功か失敗かを取得します。 </summary>
+        public bool IsSuccess { get; protected set; }
+
+        /// <summary> レスポンスを表す新しいインスタンスを初期化します。 </summary>
+        /// <param name="headers"> レスポンスヘッダ。 </param>
+        /// <param name="body"> レスポンスボディ。 </param>
+        /// <param name="statusCode"> ステータスコード。 </param>
         public SugarSyncHttpResponse(HttpResponseHeaders headers, string body, HttpStatusCode statusCode)
         {
             Headers = headers;
             BodyString = body;
             StatusCode = statusCode;
         }
+
+        protected SugarSyncHttpResponse(bool isSuccess)
+        {
+            Headers = null;
+            BodyString = null;
+            StatusCode = default(HttpStatusCode);
+            IsSuccess = isSuccess;
+        }
     }
 
-    /// <summary> SugarSync API のレスポンスを格納するクラス? </summary>
+    /// <summary> SugarSyncのプラットフォームAPIにおけるサーバーからのレスポンスを格納するクラス? </summary>
     /// <typeparam name="T"> レスポンスボディを格納するプロパティの型。 </typeparam>
     public class SugarSyncHttpResponse<T> : SugarSyncHttpResponse where T : class, new()
     {
-        public T Body { get; private set; }
+        /// <summary> レスポンスボディを示すクラスを取得します。 </summary>
+        public T Body { get; protected set; }
 
+        /// <summary> レスポンスを表す新しいインスタンスを初期化します。 </summary>
+        /// <param name="headers"> レスポンスヘッダ。 </param>
+        /// <param name="body"> レスポンスボディ。 </param>
+        /// <param name="statusCode"> ステータスコード。 </param>
         public SugarSyncHttpResponse(HttpResponseHeaders headers, string body, HttpStatusCode statusCode)
             : base(headers, body, statusCode)
         {
