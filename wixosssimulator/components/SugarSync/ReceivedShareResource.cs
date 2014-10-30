@@ -10,8 +10,10 @@ namespace WixossSimulator.SugarSync
     /// <summary> 
     /// A received share resource represents a shared folder owned by another user and to which this user has been granted access privileges by the owner.
     /// https://www.sugarsync.com/dev/api/received-share-resource.html
+    /// 
+    /// https://www.sugarsync.com/dev/api/received-share-list-resource.html
     /// </summary>
-    [XmlRoot("folder")]
+    [XmlRoot("receivedShare")]
     public class ReceivedShareResource
     {
         /// <summary> The <permissions> element has the following subelements: </summary>
@@ -40,6 +42,10 @@ namespace WixossSimulator.SugarSync
         }
 
 
+
+        /// <summary> ref attribute points to the shared folder resource. </summary>
+        [XmlAttribute("ref")]
+        public string ReferenceUrl { get; set; }
 
         /// <summary> The user-visible name of the folder. </summary>
         [XmlElement("displayName")]

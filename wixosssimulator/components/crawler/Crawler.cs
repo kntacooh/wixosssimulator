@@ -151,14 +151,42 @@ namespace WixossSimulator.Crawling
             //}
         }
 
+        protected async Task<string> GetTokenAuthRequestString()
+        {
+            using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
+            {
+                try
+                {
+                    client.DefaultRequestHeaders.AcceptCharset.Add(System.Net.Http.Headers.StringWithQualityHeaderValue.Parse("UTF-8"));
+                    using (var response = await client.GetAsync("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"))
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                    }
+                }
+                catch { return null; }
+            }
+        }
+
+        protected async Task<TokenAuthRequestResource> GetTokenAuthRequest()
+        {
+            try 
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(TokenAuthRequestResource));
+                using (var reader = new System.IO.StringReader(await GetTokenAuthRequestString())) { return (TokenAuthRequestResource)serializer.Deserialize(reader); }
+            }
+            catch { return null; }
+        }
+
         public async Task Testing()
         {
             SugarSyncApiWrapper sugarsync = new SugarSyncApiWrapper();
-            if (!await sugarsync.CreateAccessTokenAsync())
+            //if (!await sugarsync.CreateAccessTokenAsync(await GetTokenAuthRequest()))
+            if (!await sugarsync.CreateAccessTokenAsync(await GetTokenAuthRequestString()))
             {
                 Clients.Caller.SetProgressPrimary(1, "アクセストークンを取得できませんでした。");
                 return;
             }
+
             //s.Authorization = "";
             //s.Expiration = DateTime.Parse("2014/10/14 1:15:04");
 

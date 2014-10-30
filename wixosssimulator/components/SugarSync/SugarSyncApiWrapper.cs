@@ -8,13 +8,8 @@ using System.Web;
 using System.Threading.Tasks; //Task
 using System.Collections.Specialized; //NameValueCollection
 
-//using System.Net; //WebClient
-//using System.IO;
-//using System.Text; //StringBuilder
-
-//using System.Xml; //XmlDocument
-//using System.Xml.Linq; //XDocument
-//using System.Xml.Serialization; //XmlSerializer
+using System.Net.Http; //HttpClient
+using System.Net.Http.Headers; //MediaTypeWithQualityHeaderValue
 
 namespace WixossSimulator.SugarSync
 {
@@ -31,23 +26,30 @@ namespace WixossSimulator.SugarSync
         private string workspacePrefix = null;
         private string folderPrefix = null;
         private string filePrefix = null;
+        private string receivedSharePrefix = null;
 
         /// <summary> ユーザーを示すアドレスを取得します。 </summary>
         /// <returns></returns>
         protected string UserUrl(){ return userPrefix; }
         /// <summary> Workspaceを示すアドレスを取得します。 </summary>
-        /// <param name="workspaceId"> Workspaceを示すID? </param>
+        /// <param name="id"> Workspaceを示すID? </param>
         /// <returns></returns>
-        protected string WorkspaceUrl(string workspaceId) { return workspacePrefix + workspaceId; }
+        protected string WorkspaceUrl(string id) { return workspacePrefix + id; }
         /// <summary> フォルダを示すアドレスを取得します。 </summary>
-        /// <param name="folderId"> フォルダを示すID? </param>
+        /// <param name="id"> フォルダを示すID? </param>
         /// <returns></returns>
-        protected string FolderUrl(string folderId) { return folderPrefix + folderId; }
+        protected string FolderUrl(string id) { return folderPrefix + id; }
         /// <summary> ファイルを示すアドレスを取得します。 </summary>
-        /// <param name="fileId"> ファイルを示すID? </param>
+        /// <param name="id"> ファイルを示すID? </param>
         /// <returns></returns>
-        protected string FileUrl(string fileId) { return filePrefix + fileId; }
+        protected string FileUrl(string id) { return filePrefix + id; }
+        /// <summary> ReceivedShareを示すアドレスを取得します。 </summary>
+        /// <param name="userId"> ReceivedShareを所有するユーザーのID? </param>
+        /// <param name="receivedShareId"> ReceivedShareを示すID? </param>
+        /// <returns></returns>
+        protected string ReceivedShareUrl(long userId, string receivedShareId) { return receivedSharePrefix + userId.ToString() + "/" + receivedShareId; }
 
+        //不必要?
         /// <summary> コンテンツを示すアドレスからID? を取得します。 </summary>
         /// <param name="contentUrl"> コンテンツを示すアドレス。 </param>
         /// <returns></returns>
@@ -86,6 +88,7 @@ namespace WixossSimulator.SugarSync
                     workspacePrefix = "https://api.sugarsync.com/workspace/:sc:" + UserId.ToString() + ":";
                     folderPrefix = "https://api.sugarsync.com/folder/:sc:" + UserId.ToString() + ":";
                     filePrefix = "https://api.sugarsync.com/file/:sc:" + UserId.ToString() + ":";
+                    receivedSharePrefix = "https://api.sugarsync.com/receivedShare/" + UserId.ToString() + "/:sc:";
                 }
                 else
                 {
@@ -93,9 +96,12 @@ namespace WixossSimulator.SugarSync
                     workspacePrefix = null;
                     folderPrefix = null;
                     filePrefix = null;
+                    receivedSharePrefix = null;
                 }
             }
         }
+
+
 
         public SugarSyncApiWrapper()
         {
@@ -104,20 +110,100 @@ namespace WixossSimulator.SugarSync
             UserId = -1;
         }
 
-        protected async Task<string> GetTokenAuthRequest()
+        public async Task<SugarSyncHttpResponse> CreateRefreshToken(AppAuthorizationResource appAuthorization)
         {
-            using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
-            {
-                try
-                {
-                    client.DefaultRequestHeaders.AcceptCharset.Add(System.Net.Http.Headers.StringWithQualityHeaderValue.Parse("UTF-8"));
-                    using (var response = await client.GetAsync("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"))
-                    {
-                        return await response.Content.ReadAsStringAsync();
-                    }
-                }
-                catch { return null; }
-            }
+            return await SugarSyncHttpClient.PostXmlAsync(this, "https://api.sugarsync.com/app-authorization", appAuthorization);
+        }
+
+        //protected async Task<string> GetTokenAuthRequest()
+        //{
+        //    using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
+        //    {
+        //        try
+        //        {
+        //            client.DefaultRequestHeaders.AcceptCharset.Add(System.Net.Http.Headers.StringWithQualityHeaderValue.Parse("UTF-8"));
+        //            using (var response = await client.GetAsync("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"))
+        //            {
+        //                return await response.Content.ReadAsStringAsync();
+        //            }
+        //        }
+        //        catch { return null; }
+        //    }
+        //}
+
+        ///// <summary>
+        ///// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
+        ///// (ここで作成されるアクセストークンの有効期限は1時間です。)
+        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
+        ///// </summary>
+        ///// <returns></returns>
+        //public async Task<bool> CreateAccessTokenAsync()
+        //{
+        //    string tokenAuthRequest = await GetTokenAuthRequest();
+        //    if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
+
+        //    Expiration = DateTime.MaxValue;
+        //    Authorization = null;
+
+        //    try
+        //    {
+        //        var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
+
+        //        Expiration = response.Body.Expiration;
+        //        Authorization = response.Headers.Location.AbsoluteUri;
+        //        UserId = response.Body.UserId;
+        //    }
+        //    catch
+        //    {
+        //        Expiration = DateTime.MinValue;
+        //        Authorization = null;
+        //        UserId = -1;
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
+
+        ///// <summary>
+        ///// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
+        ///// (ここで作成されるアクセストークンの有効期限は1時間です。)
+        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
+        ///// </summary>
+        ///// <returns></returns>
+        //public async Task<bool> CreateAccessTokenAsync(TokenAuthRequestResource tokenAuthRequest)
+        //{
+        //    Expiration = DateTime.MaxValue;
+        //    Authorization = null;
+
+        //    try
+        //    {
+        //        var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
+
+        //        Expiration = response.Body.Expiration;
+        //        Authorization = response.Headers.Location.AbsoluteUri;
+        //        UserId = response.Body.UserId;
+        //    }
+        //    catch
+        //    {
+        //        Expiration = DateTime.MinValue;
+        //        Authorization = null;
+        //        UserId = -1;
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
+
+        /// <summary>
+        /// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
+        /// (ここで作成されるアクセストークンの有効期限は1時間です。)
+        /// https://www.sugarsync.com/dev/api/method/create-auth-token.html
+        /// </summary>
+        /// <param name="tokenAuthRequest"> ユーザーの認証情報を示すXMLインスタンスである文字列。XML宣言を含めてはいけない。 </param>
+        /// <returns></returns>
+        public async Task<bool> CreateAccessTokenAsync(string tokenAuthRequest)
+        {
+            return await GetAccessTokenResourceAsync(tokenAuthRequest);
         }
 
         /// <summary>
@@ -125,22 +211,33 @@ namespace WixossSimulator.SugarSync
         /// (ここで作成されるアクセストークンの有効期限は1時間です。)
         /// https://www.sugarsync.com/dev/api/method/create-auth-token.html
         /// </summary>
+        /// <param name="tokenAuthRequest"> ユーザーの認証情報を示すクラス。 </param>
         /// <returns></returns>
-        public async Task<bool> CreateAccessTokenAsync()
+        public async Task<bool> CreateAccessTokenAsync(TokenAuthRequestResource tokenAuthRequest)
         {
-            string tokenAuthRequest = await GetTokenAuthRequest();
-            if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
+            return await GetAccessTokenResourceAsync(tokenAuthRequest);
+        }
 
+        private async Task<bool> GetAccessTokenResourceAsync(object tokenAuthRequest)
+        {
             Expiration = DateTime.MaxValue;
             Authorization = null;
 
             try
             {
-                var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
+                var requestXml = new StringContent(SugarSyncHttpClient.FormatRequestXml(tokenAuthRequest));
+                requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
+                requestXml.Headers.ContentType.CharSet = "UTF-8";
 
-                Expiration = response.Body.Expiration;
-                Authorization = response.Headers.Location.AbsoluteUri;
-                UserId = response.Body.UserId;
+                using (var client = new HttpClient())
+                {
+                    var response = await SugarSyncHttpClient.ConnectAsync<AccessTokenResource>(
+                        this, client, async () => await client.PostAsync("https://api.sugarsync.com/authorization", requestXml), true);
+
+                    Expiration = response.Body.Expiration;
+                    Authorization = response.Headers.Location.AbsoluteUri;
+                    UserId = response.Body.UserId;
+                }
             }
             catch
             {
@@ -152,6 +249,46 @@ namespace WixossSimulator.SugarSync
 
             return true;
         }
+
+        //private Func<Task<SugarSyncHttpResponse<AccessTokenResource>>> GetAccessTokenResponseAsync(object tokenAuthRequest)
+        //{
+        //    return async () =>
+        //    {
+        //        var requestXml = new StringContent(SugarSyncHttpClient.FormatRequestXml(tokenAuthRequest));
+        //        requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
+        //        requestXml.Headers.ContentType.CharSet = "UTF-8";
+
+        //        using (var client = new HttpClient()) 
+        //        {
+        //            return await SugarSyncHttpClient.ConnectAsync<AccessTokenResource>(
+        //                this, client, async () => await client.PostAsync("https://api.sugarsync.com/authorization", requestXml), true); 
+        //        }
+        //    };
+        //}
+
+        //private async Task<bool> CreateAccessTokenAsync(Func<Task<SugarSyncHttpResponse<AccessTokenResource>>> getAccessTokenMethod)
+        //{
+        //    Expiration = DateTime.MaxValue;
+        //    Authorization = null;
+
+        //    try
+        //    {
+        //        var response = await getAccessTokenMethod();
+
+        //        Expiration = response.Body.Expiration;
+        //        Authorization = response.Headers.Location.AbsoluteUri;
+        //        UserId = response.Body.UserId;
+        //    }
+        //    catch
+        //    {
+        //        Expiration = DateTime.MinValue;
+        //        Authorization = null;
+        //        UserId = -1;
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
 
         /// <summary>
         /// SugarSyncユーザーについての情報を取得します。
@@ -405,11 +542,10 @@ namespace WixossSimulator.SugarSync
         /// </summary>
         /// <param name="folderResource"> 更新されるフォルダを示すクラス。 </param>
         /// <returns></returns>
-        public async Task<bool> UpdateFolderInformationAsync(FolderResource folderResource)
+        public async Task<SugarSyncHttpResponse> UpdateFolderInformationAsync(FolderResource folderResource)
         {
             string folderId = folderResource.Dsid.Replace("/sc/" + UserId.ToString() + "/", "");
-            return (int)(await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource))
-                .StatusCode / 100 == 2;
+            return await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource);
         }
 
         /// <summary>
@@ -421,23 +557,21 @@ namespace WixossSimulator.SugarSync
         /// <param name="updatedDisplayName"> 更新されるフォルダの名前。nullである場合は更新しません。 </param>
         /// <param name="parentDirectoryId"> 更新されるフォルダの親ディレクトリを示すID? nullである場合は更新しません。 </param>
         /// <returns></returns>
-        public async Task<bool> UpdateFolderInformationAsync(string folderId, string updatedDisplayName = null, string parentDirectoryId = null)
+        public async Task<SugarSyncHttpResponse> UpdateFolderInformationAsync(string folderId, string updatedDisplayName = null, string parentDirectoryId = null)
         {
-            if (isEmptyOrWhiteSpaceString(updatedDisplayName, parentDirectoryId)) { return false; }
-            //if ((updatedDisplayName != null && string.IsNullOrWhiteSpace(updatedDisplayName))
+            if (isEmptyOrWhiteSpaceString(updatedDisplayName, parentDirectoryId)) { return SugarSyncHttpResponse.Failure; }
             //    || (parentFolderId != null && string.IsNullOrWhiteSpace(parentFolderId))) { return false; }
 
             var folderResource = (await RetrieveFolderInformationAsync(folderId)).Body;
-            if (updatedDisplayName == null && parentDirectoryId == null) { return true; }
 
+            //if (updatedDisplayName == null && parentDirectoryId == null) { return SugarSyncHttpResponse.Success; }
             updatedDisplayName = updatedDisplayName ?? folderResource.DisplayName;
             var parent = (parentDirectoryId == null) ? folderResource.Parent : FolderUrl(parentDirectoryId);
-            if (folderResource.DisplayName == updatedDisplayName && folderResource.Parent == parent) { return true; }
+            if (folderResource.DisplayName == updatedDisplayName && folderResource.Parent == parent) { return SugarSyncHttpResponse.Success; }
             folderResource.DisplayName = updatedDisplayName;
             folderResource.Parent = parent;
 
-            return (int)(await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource))
-                .StatusCode / 100 == 2;
+            return await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource);
         }
 
         private bool isEmptyOrWhiteSpaceString(params string[] args)
@@ -446,6 +580,9 @@ namespace WixossSimulator.SugarSync
             return false;
         }
 
-
+        public async Task<SugarSyncHttpResponse<ReceivedShareResource>> RetrievieReceivedShareInformationAsync(string receivedShareId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

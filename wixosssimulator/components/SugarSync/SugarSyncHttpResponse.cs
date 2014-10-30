@@ -6,6 +6,7 @@ using System.Web;
 using System.Threading.Tasks; //Task
 
 using System.IO; //Stream (Reader/Writer)
+using System.Net; //HttpStatus
 using System.Net.Http; //HttpClient
 using System.Net.Http.Headers; //AuthenticationHeaderValue
 
@@ -18,9 +19,7 @@ using System.Collections.Specialized; //NameValueCollection
 
 namespace WixossSimulator.SugarSync
 {
-    using System.Net;
-
-    /// <summary> SugarSyncのプラットフォームAPIを利用して、HTTPサーバーと通信を行うためのメソッドを提供します? </summary>
+    /// <summary> SugarSyncのプラットフォームAPIを利用して、HTTPサーバーと通信を行うための静的メソッドを提供します? </summary>
     public class SugarSyncHttpClient
     {
         /// <summary> HTTPサーバーに GET 要求を送信して、そのレスポンスを格納する? </summary>
@@ -94,14 +93,11 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public static async Task<SugarSyncHttpResponse<T>> PostXmlAsync<T>(SugarSyncApiWrapper wrapper, Uri uri, object request) where T : class,new()
         {
-            //client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/xml");
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             var requestXml = new StringContent(FormatRequestXml(request));
             requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
             requestXml.Headers.ContentType.CharSet = "UTF-8";
 
             using (var client = new HttpClient()) { return await ConnectAsync<T>(wrapper, client, async () => await client.PostAsync(uri, requestXml)); }
-
         }
 
         /// <summary> HTTPサーバーに、内容がXMLである PUT 要求を送信して、そのレスポンスを格納する? </summary>
@@ -188,14 +184,15 @@ namespace WixossSimulator.SugarSync
         /// <param name="client"> 接続に使用するHttpClient。 </param>
         /// <param name="connectingMethod"> HTTP要求を示すメソッド。 </param>
         /// <returns></returns>
-        protected static async Task<SugarSyncHttpResponse<T>> ConnectAsync<T>(
-            SugarSyncApiWrapper wrapper, HttpClient client, Func<Task<HttpResponseMessage>> connectingMethod) where T : class,new()
+        protected internal static async Task<SugarSyncHttpResponse<T>> ConnectAsync<T>(
+            SugarSyncApiWrapper wrapper, HttpClient client, Func<Task<HttpResponseMessage>> connectingMethod,
+            bool isGettingAuthorization = false) where T : class,new()
         {
             if (wrapper.Expiration < DateTime.Now) { return null; }
 
             client.MaxResponseContentBufferSize = 1000000;
 
-            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.Authorization);
+            if (!isGettingAuthorization) { client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", wrapper.Authorization); }
             //これはエラー //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(wrapper.authorization);
 
             //必要?
@@ -232,24 +229,34 @@ namespace WixossSimulator.SugarSync
         /// <summary> リクエストボディをXMLに変換する? </summary>
         /// <param name="request"> リクエストボディを表すオブジェクト。文字列型の場合にXML宣言を含めてはいけない。それ以外の型の場合は無視? </param>
         /// <returns></returns>
-        protected static string FormatRequestXml(object request)
+        protected internal static string FormatRequestXml(object request)
         {
-            StringBuilder requestBodyBuilder = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
+            var requestBody = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
             try
             {
-                Type requestBodyType = request.GetType();
-                if (requestBodyType == typeof(string)) { requestBodyBuilder.Append((string)request); }
-                else if (requestBodyType == typeof(XDocument)) { requestBodyBuilder.Append(((XDocument)request).ToString()); }
-                else if (requestBodyType == typeof(XmlDocument)) { requestBodyBuilder.Append(((XmlDocument)request).OuterXml); }
+                Type requestType = request.GetType();
+                if (requestType == typeof(string)) { requestBody += (string)request; }
+                else if (requestType == typeof(XDocument)) { requestBody += ((XDocument)request).ToString(); }
+                else if (requestType == typeof(XmlDocument)) { requestBody += ((XmlDocument)request).OuterXml; }
                 else
                 {
-                    XmlSerializer serializer = new XmlSerializer(requestBodyType);
-                    using (StringWriter writer = new StringWriter(requestBodyBuilder)) { serializer.Serialize(writer, request); } // StringBuilder初期化時のXML宣言は有効?
+                    var serializer = new XmlSerializer(requestType);
+                    var namespaces = new XmlSerializerNamespaces();
+                    namespaces.Add(string.Empty, string.Empty);
+                    using (var writer = new StringWriter())
+                    {
+                        serializer.Serialize(writer, request, namespaces);
+                        var xml = writer.ToString();
+                        var x = "?>";
+                        xml = xml.Substring(xml.IndexOf(x) + x.Length);
+                        requestBody += xml;
+                    }
+                    //using (var writer = new StringWriter(requestBodyBuilder)) { serializer.Serialize(writer, request, namespaces); }
                 }
             }
             catch { return null; }
 
-            return requestBodyBuilder.ToString();
+            return requestBody;
         }
     }
 
@@ -329,14 +336,14 @@ namespace WixossSimulator.SugarSync
                 if (t == typeof(XDocument)) { return XDocument.Parse(bodyString) as T; }
                 else if (t == typeof(XmlDocument))
                 {
-                    XmlDocument document = new XmlDocument();
+                    var document = new XmlDocument();
                     document.LoadXml(bodyString);
                     return document as T;
                 }
                 else
                 {
-                    XmlSerializer serializer = new XmlSerializer(typeof(T));
-                    using (StringReader reader = new StringReader(bodyString)) { return (T)serializer.Deserialize(reader); }
+                    var serializer = new XmlSerializer(typeof(T));
+                    using (var reader = new StringReader(bodyString)) { return (T)serializer.Deserialize(reader); }
                 }
             }
             catch { return null; }
