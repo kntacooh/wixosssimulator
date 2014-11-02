@@ -129,10 +129,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="components\Sql\CrawlingData.cs" />
-    <Compile Include="components\SugarSync\AccessTokenResource.cs" />
-    <Compile Include="components\SugarSync\AppAuthorizationResource.cs" />
-    <Compile Include="components\SugarSync\ReceivedShareResource.cs" />
-    <Compile Include="components\SugarSync\ReceivedSharesListResource.cs" />
+    <Compile Include="components\SugarSync\Resource\AccessToken.cs" />
+    <Compile Include="components\SugarSync\Resource\AppAuthorization.cs" />
+    <Compile Include="components\SugarSync\Resource\Contact.cs" />
+    <Compile Include="components\SugarSync\Resource\FileVersions.cs" />
+    <Compile Include="components\SugarSync\Resource\ReceivedShare.cs" />
+    <Compile Include="components\SugarSync\Resource\ReceivedSharesList.cs" />
     <Compile Include="components\SugarSync\SugarSyncEnum.cs" />
     <Compile Include="components\SugarSync\SugarSyncApiWrapper.cs" />
     <Compile Include="components\Sql\TableData.cs" />
@@ -147,14 +149,14 @@
     <Compile Include="components\Crawler\PageAnalyser.cs" />
     <Compile Include="components\Crawler\Crawler.cs" />
     <Compile Include="components\Stream.cs" />
-    <Compile Include="components\SugarSync\FileResource.cs" />
-    <Compile Include="components\SugarSync\FolderResource.cs" />
-    <Compile Include="components\SugarSync\FoldersCollectionResource.cs" />
+    <Compile Include="components\SugarSync\Resource\File.cs" />
+    <Compile Include="components\SugarSync\Resource\Folder.cs" />
+    <Compile Include="components\SugarSync\Resource\FoldersCollection.cs" />
     <Compile Include="components\SugarSync\SugarSyncHttpResponse.cs" />
-    <Compile Include="components\SugarSync\TokenAuthRequestResource.cs" />
-    <Compile Include="components\SugarSync\UserResource.cs" />
-    <Compile Include="components\SugarSync\WorkspaceResource.cs" />
-    <Compile Include="components\SugarSync\WorkspacesCollectionResource.cs" />
+    <Compile Include="components\SugarSync\Resource\TokenAuthRequest.cs" />
+    <Compile Include="components\SugarSync\Resource\User.cs" />
+    <Compile Include="components\SugarSync\Resource\Workspace.cs" />
+    <Compile Include="components\SugarSync\Resource\WorkspacesCollection.cs" />
     <Compile Include="components\SugarSync\SugarSyncResource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="test\helloworld.aspx.cs">

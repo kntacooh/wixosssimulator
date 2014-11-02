@@ -22,6 +22,8 @@ namespace WixossSimulator.SugarSync
         /// <summary> A SugarSync identifier that uniquely identifies the workspace resource. </summary>
         [XmlElement("dsid")]
         public string Dsid { get; set; }
+        //[XmlIgnore] //プロパティにするなら必要
+        public string GetWorkspaceId() { return Dsid.Substring(Dsid.LastIndexOf('/') + 1); }
 
         [XmlElement("timeCreated")]
         public string TimeCreatedString

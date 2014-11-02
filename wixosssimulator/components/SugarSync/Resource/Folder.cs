@@ -20,7 +20,7 @@ namespace WixossSimulator.SugarSync
         public class SharingElement
         {
             [XmlAttribute("enabled")]
-            public bool Enabled { get; set; }
+            public bool? Enabled { get; set; }
         }
 
 
@@ -32,6 +32,8 @@ namespace WixossSimulator.SugarSync
         /// <summary> A SugarSync identifier that uniquely identifies the folder resource. </summary>
         [XmlElement("dsid")]
         public string Dsid { get; set; }
+        //[XmlIgnore] //プロパティにするなら必要
+        public string GetFolderId() { return Dsid.Substring(Dsid.LastIndexOf('/') + 1); }
 
         [XmlElement("timeCreated")]
         public string TimeCreatedString

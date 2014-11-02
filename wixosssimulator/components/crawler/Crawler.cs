@@ -223,7 +223,7 @@ namespace WixossSimulator.Crawling
             result += "----- 16. " + result16.BodyString;
 
             //var result19 = await sugarsync.DeleteFolderAsync(
-            //    sugarsync.GetContentId(result16.Body.Collection[0].ReferenceUrl));
+            //    sugarsync.GetContentId(result16.Body.Collection[0].Ref));
             //result += "----- 19. " + result19.StatusCode;
 
             string folderId2 = "";

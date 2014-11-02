@@ -22,13 +22,13 @@ namespace WixossSimulator.SugarSync
             public class ReadAllowedElement
             {
                 [XmlAttribute("enabled")]
-                public bool Enabled { get; set; }
+                public bool? Enabled { get; set; }
             }
 
             public class WriteAllowedElement
             {
                 [XmlAttribute("enabled")]
-                public bool Enabled { get; set; }
+                public bool? Enabled { get; set; }
             }
 
 
@@ -45,7 +45,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> ref attribute points to the shared folder resource. </summary>
         [XmlAttribute("ref")]
-        public string ReferenceUrl { get; set; }
+        public string Ref { get; set; }
 
         /// <summary> The user-visible name of the folder. </summary>
         [XmlElement("displayName")]

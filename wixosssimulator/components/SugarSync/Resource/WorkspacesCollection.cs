@@ -28,14 +28,14 @@ namespace WixossSimulator.SugarSync
 
             /// <summary> A link to the workspace. </summary>
             [XmlElement("ref")]
-            public string ReferenceUrl { get; set; }
+            public string Ref { get; set; }
 
             /// <summary> 
             /// The identifier of the icon associated with the workspace resource. 
             /// Note that the actual icons that are associated with SugarSync workspaces are not available through the Platform API. 
             /// </summary>
             [XmlElement("iconId")]
-            public long IconId { get; set; }
+            public long? IconId { get; set; }
 
             /// <summary> A link to the contents of the workspace. The contents of a workspace are the sync folders that are mapped to that workspace in SugarSync. </summary>
             [XmlElement("contents")]
@@ -45,13 +45,13 @@ namespace WixossSimulator.SugarSync
 
 
         [XmlAttribute("end")]
-        public long End { get; set; }
+        public long? End { get; set; }
 
         [XmlAttribute("hasMore")]
-        public bool HasMore { get; set; }
+        public bool? HasMore { get; set; }
 
         [XmlAttribute("start")]
-        public long Start { get; set; }
+        public long? Start { get; set; }
 
         [XmlElement("collection")]
         public List<CollectionElement> Collection { get; set; }

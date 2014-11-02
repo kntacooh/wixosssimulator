@@ -22,32 +22,41 @@ namespace WixossSimulator.SugarSync
     {
         private long userId;
 
-        private string userPrefix = null;
-        private string workspacePrefix = null;
-        private string folderPrefix = null;
-        private string filePrefix = null;
-        private string receivedSharePrefix = null;
+        private string userPrefix;
+        private string workspacePrefix;
+        private string folderPrefix;
+        private string filePrefix;
+        private string receivedSharePrefix;
+        private string contactPrefix;
 
         /// <summary> ユーザーを示すアドレスを取得します。 </summary>
         /// <returns></returns>
-        protected string UserUrl(){ return userPrefix; }
+        protected string UserUrl() { return userPrefix; }
         /// <summary> Workspaceを示すアドレスを取得します。 </summary>
         /// <param name="id"> Workspaceを示すID? </param>
         /// <returns></returns>
-        protected string WorkspaceUrl(string id) { return workspacePrefix + id; }
+        protected string WorkspaceUrl(string id) { return id == null ? null : workspacePrefix + id; }
         /// <summary> フォルダを示すアドレスを取得します。 </summary>
         /// <param name="id"> フォルダを示すID? </param>
         /// <returns></returns>
-        protected string FolderUrl(string id) { return folderPrefix + id; }
+        protected string FolderUrl(string id) { return id == null ? null : folderPrefix + id; }
         /// <summary> ファイルを示すアドレスを取得します。 </summary>
         /// <param name="id"> ファイルを示すID? </param>
         /// <returns></returns>
-        protected string FileUrl(string id) { return filePrefix + id; }
+        protected string FileUrl(string id) { return id == null ? null : filePrefix + id; }
         /// <summary> ReceivedShareを示すアドレスを取得します。 </summary>
-        /// <param name="userId"> ReceivedShareを所有するユーザーのID? </param>
+        /// <param name="userId"> ReceivedShareを所有するユーザー?のID? </param>
         /// <param name="receivedShareId"> ReceivedShareを示すID? </param>
         /// <returns></returns>
-        protected string ReceivedShareUrl(long userId, string receivedShareId) { return receivedSharePrefix + userId.ToString() + "/" + receivedShareId; }
+        protected string ReceivedShareUrl(long userId, string receivedShareId) 
+        {
+            if (userId < 0 || receivedShareId == null) { return null; }
+            return receivedSharePrefix + userId.ToString() + ":" + receivedShareId; 
+        }
+        /// <summary> Contactを示すアドレスを取得します。 </summary>
+        /// <param name="userId"> ユーザーを示すID? </param>
+        /// <returns></returns>
+        protected string ContactUrl(long userId) { return userId < 0 ? null : contactPrefix + userId; }
 
         //不必要?
         /// <summary> コンテンツを示すアドレスからID? を取得します。 </summary>
@@ -57,13 +66,15 @@ namespace WixossSimulator.SugarSync
         {
             var p = ":sc:" + UserId.ToString() + ":";
             var r = contentUrl.Substring(contentUrl.IndexOf(p) + p.Length);
-            var i = r.IndexOf("/");
+            var i = r.IndexOf('/');
             if (i == -1) { return r; }
             else { return r.Remove(i); }
         } 
 
 #if(Authorizationを変更可能にする)
         public DateTime Expiration { get; set; }
+
+        public UserResource UserResource { get; set; }
 
         public string Authorization { get; set; }
         public long UserId 
@@ -73,6 +84,8 @@ namespace WixossSimulator.SugarSync
             {
 #else
         public DateTime Expiration { get; private set; }
+
+        protected UserResource UserResource { get; private set; }
 
         protected string Authorization { get; private set; }
         protected long UserId 
@@ -89,6 +102,7 @@ namespace WixossSimulator.SugarSync
                     folderPrefix = "https://api.sugarsync.com/folder/:sc:" + UserId.ToString() + ":";
                     filePrefix = "https://api.sugarsync.com/file/:sc:" + UserId.ToString() + ":";
                     receivedSharePrefix = "https://api.sugarsync.com/receivedShare/" + UserId.ToString() + "/:sc:";
+                    contactPrefix = "https://api.sugarsync.com/contact/" + UserId.ToString() + "/";
                 }
                 else
                 {
@@ -97,6 +111,7 @@ namespace WixossSimulator.SugarSync
                     folderPrefix = null;
                     filePrefix = null;
                     receivedSharePrefix = null;
+                    contactPrefix = null;
                 }
             }
         }
@@ -114,85 +129,6 @@ namespace WixossSimulator.SugarSync
         {
             return await SugarSyncHttpClient.PostXmlAsync(this, "https://api.sugarsync.com/app-authorization", appAuthorization);
         }
-
-        //protected async Task<string> GetTokenAuthRequest()
-        //{
-        //    using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
-        //    {
-        //        try
-        //        {
-        //            client.DefaultRequestHeaders.AcceptCharset.Add(System.Net.Http.Headers.StringWithQualityHeaderValue.Parse("UTF-8"));
-        //            using (var response = await client.GetAsync("http://zeta00s.php.xdomain.jp/wixoss/sugarsync/token-auth-request.xml"))
-        //            {
-        //                return await response.Content.ReadAsStringAsync();
-        //            }
-        //        }
-        //        catch { return null; }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
-        ///// (ここで作成されるアクセストークンの有効期限は1時間です。)
-        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
-        ///// </summary>
-        ///// <returns></returns>
-        //public async Task<bool> CreateAccessTokenAsync()
-        //{
-        //    string tokenAuthRequest = await GetTokenAuthRequest();
-        //    if (string.IsNullOrWhiteSpace(tokenAuthRequest)) { return false; }
-
-        //    Expiration = DateTime.MaxValue;
-        //    Authorization = null;
-
-        //    try
-        //    {
-        //        var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
-
-        //        Expiration = response.Body.Expiration;
-        //        Authorization = response.Headers.Location.AbsoluteUri;
-        //        UserId = response.Body.UserId;
-        //    }
-        //    catch
-        //    {
-        //        Expiration = DateTime.MinValue;
-        //        Authorization = null;
-        //        UserId = -1;
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
-        ///// <summary>
-        ///// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
-        ///// (ここで作成されるアクセストークンの有効期限は1時間です。)
-        ///// https://www.sugarsync.com/dev/api/method/create-auth-token.html
-        ///// </summary>
-        ///// <returns></returns>
-        //public async Task<bool> CreateAccessTokenAsync(TokenAuthRequestResource tokenAuthRequest)
-        //{
-        //    Expiration = DateTime.MaxValue;
-        //    Authorization = null;
-
-        //    try
-        //    {
-        //        var response = await SugarSyncHttpClient.PostXmlAsync<AccessTokenResource>(this, "https://api.sugarsync.com/authorization", tokenAuthRequest);
-
-        //        Expiration = response.Body.Expiration;
-        //        Authorization = response.Headers.Location.AbsoluteUri;
-        //        UserId = response.Body.UserId;
-        //    }
-        //    catch
-        //    {
-        //        Expiration = DateTime.MinValue;
-        //        Authorization = null;
-        //        UserId = -1;
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
 
         /// <summary>
         /// プラットフォームAPIを介してユーザーのリソースにアクセスするための認証を行います。
@@ -238,57 +174,22 @@ namespace WixossSimulator.SugarSync
                     Authorization = response.Headers.Location.AbsoluteUri;
                     UserId = response.Body.UserId;
                 }
+
+                UserResource = (await RetrieveUserInformationAsync()).Body;
             }
             catch
             {
                 Expiration = DateTime.MinValue;
                 Authorization = null;
                 UserId = -1;
+
+                UserResource = null;
+
                 return false;
             }
 
             return true;
         }
-
-        //private Func<Task<SugarSyncHttpResponse<AccessTokenResource>>> GetAccessTokenResponseAsync(object tokenAuthRequest)
-        //{
-        //    return async () =>
-        //    {
-        //        var requestXml = new StringContent(SugarSyncHttpClient.FormatRequestXml(tokenAuthRequest));
-        //        requestXml.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/xml");
-        //        requestXml.Headers.ContentType.CharSet = "UTF-8";
-
-        //        using (var client = new HttpClient()) 
-        //        {
-        //            return await SugarSyncHttpClient.ConnectAsync<AccessTokenResource>(
-        //                this, client, async () => await client.PostAsync("https://api.sugarsync.com/authorization", requestXml), true); 
-        //        }
-        //    };
-        //}
-
-        //private async Task<bool> CreateAccessTokenAsync(Func<Task<SugarSyncHttpResponse<AccessTokenResource>>> getAccessTokenMethod)
-        //{
-        //    Expiration = DateTime.MaxValue;
-        //    Authorization = null;
-
-        //    try
-        //    {
-        //        var response = await getAccessTokenMethod();
-
-        //        Expiration = response.Body.Expiration;
-        //        Authorization = response.Headers.Location.AbsoluteUri;
-        //        UserId = response.Body.UserId;
-        //    }
-        //    catch
-        //    {
-        //        Expiration = DateTime.MinValue;
-        //        Authorization = null;
-        //        UserId = -1;
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
 
         /// <summary>
         /// SugarSyncユーザーについての情報を取得します。
@@ -307,7 +208,8 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse<WorkspacesCollectionResource>> RetrieveWorkspacesCollectionAsync()
         {
-            return await SugarSyncHttpClient.GetAsync<WorkspacesCollectionResource>(this, UserUrl() + "/workspaces/contents");
+            return await SugarSyncHttpClient.GetAsync<WorkspacesCollectionResource>(this, UserResource.Workspaces);
+            //return await SugarSyncHttpClient.GetAsync<WorkspacesCollectionResource>(this, UserUrl() + "/workspaces/contents");
         }
 
         /// <summary>
@@ -340,8 +242,7 @@ namespace WixossSimulator.SugarSync
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse> UpdateWorkspaceInformationAsync(WorkspaceResource workspaceResource)
         {
-            string workspaceId = workspaceResource.Dsid.Replace("/sc/" + UserId.ToString() + "/", "");
-            return await SugarSyncHttpClient.PutXmlAsync(this, WorkspaceUrl(workspaceId), workspaceResource);
+            return await SugarSyncHttpClient.PutXmlAsync(this, WorkspaceUrl(workspaceResource.GetWorkspaceId()), workspaceResource);
         }
 
         /// <summary>
@@ -355,7 +256,9 @@ namespace WixossSimulator.SugarSync
         {
             if (isEmptyOrWhiteSpaceString(updatedDisplayName)) { return SugarSyncHttpResponse.Failure; /*名前を空白にしておくことはできません。*/ }
 
-            var workspaceResource = (await RetrieveWorkspaceInformationAsync(workspaceId)).Body;
+            var apiResponse = await RetrieveWorkspaceInformationAsync(workspaceId);
+            if (!apiResponse.IsSuccess) { return SugarSyncHttpResponse.Failure; }
+            var workspaceResource = apiResponse.Body;
 
             updatedDisplayName = updatedDisplayName ?? workspaceResource.DisplayName; //他との整合性のために、nullは変更しないことと定義
             if (workspaceResource.DisplayName == updatedDisplayName) { return SugarSyncHttpResponse.Success; } //名前が一致する場合は更新不要
@@ -384,7 +287,8 @@ namespace WixossSimulator.SugarSync
             if (start > 0) { query.Add("start", start.ToString()); }
             if (max > 0) { query.Add("max", max.ToString()); }
 
-            var uri = new UriBuilder(UserUrl() + "/folders/contents");
+            //var uri = new UriBuilder(UserUrl() + "/folders/contents");
+            var uri = new UriBuilder(UserResource.Syncfolders);
             uri.Query = query.ToString();
             return await SugarSyncHttpClient.GetAsync<FoldersCollectionResource>(this, uri.Uri);
         }
@@ -511,15 +415,15 @@ namespace WixossSimulator.SugarSync
         /// https://www.sugarsync.com/dev/api/method/copy-file.html
         /// </summary>
         /// <param name="folderId"> フォルダを示すID? </param>
-        /// <param name="copiedFileId"> コピーされるファイルを示すID? </param>
-        /// <param name="displayName"> The name of new file copy. </param>
+        /// <param name="fileId"> コピーされるファイルを示すID? </param>
+        /// <param name="newDisplayName"> The name of new file copy. </param>
         /// <returns></returns>
-        public async Task<SugarSyncHttpResponse> CopyFileAsync(string folderId, string copiedFileId, string displayName)
+        public async Task<SugarSyncHttpResponse> CopyFileAsync(string folderId, string fileId, string newDisplayName)
         {
-            if (string.IsNullOrWhiteSpace(displayName)) { return SugarSyncHttpResponse.Failure; }
+            if (string.IsNullOrWhiteSpace(newDisplayName)) { return SugarSyncHttpResponse.Failure; }
 
-            string request = "<fileCopy source=\"" + FileUrl(copiedFileId) + "\">";
-            request += "<displayName>" + displayName + "</displayName>";
+            string request = "<fileCopy source=\"" + FileUrl(fileId) + "\">";
+            request += "<displayName>" + newDisplayName + "</displayName>";
             request += "</fileCopy>";
             return await SugarSyncHttpClient.PostXmlAsync(this, FolderUrl(folderId), request);
         }
@@ -538,37 +442,43 @@ namespace WixossSimulator.SugarSync
         /// <summary>
         /// フォルダの個々の属性を更新します。
         /// 更新することができる属性は、<c>DisplayName</c>, <c>Parent</c> です。その他のフォルダの属性は変更することができません。
+        /// 
+        /// 備考: <c>Parent</c> 要素の値を変更することで、フォルダを別の親コレクション(Workspaceまたはフォルダ)に移動させることができます。
         /// https://www.sugarsync.com/dev/api/method/update-folder-info.html
         /// </summary>
         /// <param name="folderResource"> 更新されるフォルダを示すクラス。 </param>
         /// <returns></returns>
         public async Task<SugarSyncHttpResponse> UpdateFolderInformationAsync(FolderResource folderResource)
         {
-            string folderId = folderResource.Dsid.Replace("/sc/" + UserId.ToString() + "/", "");
-            return await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource);
+            return await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderResource.GetFolderId()), folderResource);
         }
 
         /// <summary>
         /// フォルダの個々の属性を更新します。
         /// 更新することができる属性は、<c>DisplayName</c>, <c>Parent</c> です。その他のフォルダの属性は変更することができません。
+        /// 
+        /// 備考: <c>Parent</c> 要素の値を変更することで、フォルダを別の親コレクション(Workspaceまたはフォルダ)に移動させることができます。
         /// https://www.sugarsync.com/dev/api/method/update-folder-info.html
         /// </summary>
         /// <param name="folderId"> フォルダを示すID? </param>
-        /// <param name="updatedDisplayName"> 更新されるフォルダの名前。nullである場合は更新しません。 </param>
+        /// <param name="displayName"> 更新されるフォルダの名前。nullである場合は更新しません。 </param>
         /// <param name="parentDirectoryId"> 更新されるフォルダの親ディレクトリを示すID? nullである場合は更新しません。 </param>
         /// <returns></returns>
-        public async Task<SugarSyncHttpResponse> UpdateFolderInformationAsync(string folderId, string updatedDisplayName = null, string parentDirectoryId = null)
+        public async Task<SugarSyncHttpResponse> UpdateFolderInformationAsync(string folderId, string displayName = null, string parentDirectoryId = null)
         {
-            if (isEmptyOrWhiteSpaceString(updatedDisplayName, parentDirectoryId)) { return SugarSyncHttpResponse.Failure; }
+            if (isEmptyOrWhiteSpaceString(displayName, parentDirectoryId)) { return SugarSyncHttpResponse.Failure; }
+            //if ((updatedDisplayName != null && string.IsNullOrWhiteSpace(updatedDisplayName))
             //    || (parentFolderId != null && string.IsNullOrWhiteSpace(parentFolderId))) { return false; }
 
-            var folderResource = (await RetrieveFolderInformationAsync(folderId)).Body;
+            var apiResponse = await RetrieveFolderInformationAsync(folderId);
+            if (!apiResponse.IsSuccess) { return SugarSyncHttpResponse.Failure; }
+            var folderResource = apiResponse.Body;
 
             //if (updatedDisplayName == null && parentDirectoryId == null) { return SugarSyncHttpResponse.Success; }
-            updatedDisplayName = updatedDisplayName ?? folderResource.DisplayName;
-            var parent = (parentDirectoryId == null) ? folderResource.Parent : FolderUrl(parentDirectoryId);
-            if (folderResource.DisplayName == updatedDisplayName && folderResource.Parent == parent) { return SugarSyncHttpResponse.Success; }
-            folderResource.DisplayName = updatedDisplayName;
+            displayName = displayName ?? folderResource.DisplayName;
+            var parent = FolderUrl(parentDirectoryId) ?? folderResource.Parent;
+            if (folderResource.DisplayName == displayName && folderResource.Parent == parent) { return SugarSyncHttpResponse.Success; }
+            folderResource.DisplayName = displayName;
             folderResource.Parent = parent;
 
             return await SugarSyncHttpClient.PutXmlAsync(this, FolderUrl(folderId), folderResource);
@@ -580,9 +490,132 @@ namespace WixossSimulator.SugarSync
             return false;
         }
 
-        public async Task<SugarSyncHttpResponse<ReceivedShareResource>> RetrievieReceivedShareInformationAsync(string receivedShareId)
+        /// <summary>
+        /// RecievedShare(他のユーザーによって所有され、その所有ユーザーによってユーザーにアクセス権が与えられた共有フォルダ?)についての情報を取得します。
+        /// https://www.sugarsync.com/dev/api/method/get-received-shares.html
+        /// </summary>
+        /// <param name="userId"> ReceivedShareを所有するユーザー?のID? </param>
+        /// <param name="receivedShareId"> ReceivedShareを示すID? </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse<ReceivedShareResource>> RetrievieReceivedShareInformationAsync(long userId, string receivedShareId)
         {
-            throw new NotImplementedException();
+            return await SugarSyncHttpClient.GetAsync<ReceivedShareResource>(this, ReceivedShareUrl(userId, receivedShareId));
+        }
+
+        /// <summary>
+        /// RetrievedShareの一覧を取得します。
+        /// https://www.sugarsync.com/dev/api/method/get-received-shares-list.html
+        /// </summary>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse<ReceivedSharesListResource>> RetrieveReceivedSharesListAsync()
+        {
+            return await SugarSyncHttpClient.GetAsync<ReceivedSharesListResource>(this, UserResource.ReceivedShares);
+            //return await SugarSyncHttpClient.GetAsync<ReceivedSharesListResource>(this, UserUrl() + "/receivedShares/contents");
+        }
+
+        /// <summary>
+        /// Contact(ユーザーと単一または複数のフォルダを共有している他のSugarSyncユーザーを表します)についての情報を取得します。
+        /// https://www.sugarsync.com/dev/api/method/get-contacts.html
+        /// </summary>
+        /// <param name="userId"> Contact?ユーザーのID? </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse<ContactResource>> RetrieveContactInformationAsync(long userId)
+        {
+            return await SugarSyncHttpClient.GetAsync<ContactResource>(this, ContactUrl(userId));
+        }
+
+        /// <summary>
+        /// ファイルについての情報を取得します。
+        /// https://www.sugarsync.com/dev/api/method/get-file-info.html
+        /// </summary>
+        /// <param name="fileId"> ファイルを示すID? </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse<FileResource>> RetrieveFileInformationAsync(string fileId)
+        {
+            return await SugarSyncHttpClient.GetAsync<FileResource>(this, FileUrl(fileId));
+        }
+
+        /// <summary>
+        /// ファイルの個々の属性を更新します。
+        /// 更新することができる属性は、<c>DisplayName</c>, <c>MediaType</c>, <c>Parent</c>, <c>PublicLink</c> です。その他のフォルダの属性は変更することができません。
+        /// 
+        /// 備考: <c>Parent</c> 要素の値を変更することで、ファイルを別の親フォルダに移動させることができます。
+        /// 加えて、<c>PublicLink</c> 要素内の <c>Enabled</c> の値を true に設定することで、ファイルへのパブリックアクセスを提供することができます。
+        /// これはファイルへのパブリックリンクを作成します。
+        /// <c>PublicLink</c> 要素内の <c>Enabled</c> の値を false に設定することで、ファイルへのパブリックアクセスを削除することができます。
+        /// これはファイルへのパブリックリンクを破棄します。
+        /// https://www.sugarsync.com/dev/api/method/update-file-info.html
+        /// </summary>
+        /// <param name="fileResource"> 更新されるファイルを示すクラス。 </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse> UpdateFileInformationAsync(FileResource fileResource)
+        {
+            return await SugarSyncHttpClient.PutXmlAsync(this, FileUrl(fileResource.GetFileId()), fileResource);
+        }
+
+        /// <summary>
+        /// ファイルの個々の属性を更新します。
+        /// 更新することができる属性は、<c>DisplayName</c>, <c>MediaType</c>, <c>Parent</c>, <c>PublicLink</c> です。その他のフォルダの属性は変更することができません。
+        /// 
+        /// 備考: <c>Parent</c> 要素の値を変更することで、ファイルを別の親フォルダに移動させることができます。
+        /// 加えて、<c>PublicLink</c> 要素内の <c>Enabled</c> の値を true に設定することで、ファイルへのパブリックアクセスを提供することができます。
+        /// これはファイルへのパブリックリンクを作成します。
+        /// <c>PublicLink</c> 要素内の <c>Enabled</c> の値を false に設定することで、ファイルへのパブリックアクセスを削除することができます。
+        /// これはファイルへのパブリックリンクを破棄します。
+        /// https://www.sugarsync.com/dev/api/method/update-file-info.html
+        /// </summary>
+        /// <param name="fileId"> ファイルを示すID? </param>
+        /// <param name="displayName"> 更新されるファイルの名前。nullである場合は更新しません。 </param>
+        /// <param name="mediaType"> 更新されるファイルのMediaType。 nullである場合は更新しません。 </param>
+        /// <param name="parentDirectoryId"> 更新されるフォルダの親ディレクトリを示すID? nullである場合は更新しません。 </param>
+        /// <param name="isEnabledPublicLink"> 更新されるファイルのパブリックリンクの有無。nullである場合は更新しません。 </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse> UpdateFileInformationAsync(
+            string fileId, string displayName = null, string mediaType = null, string parentDirectoryId = null, bool? isEnabledPublicLink = null)
+        {
+            if (isEmptyOrWhiteSpaceString(displayName, mediaType, parentDirectoryId)) { return SugarSyncHttpResponse.Failure; }
+
+            var apiResponse = await RetrieveFileInformationAsync(fileId);
+            if (!apiResponse.IsSuccess) { return SugarSyncHttpResponse.Failure; }
+            var fileResource = apiResponse.Body;
+
+            displayName = displayName ?? fileResource.DisplayName;
+            mediaType = mediaType ?? fileResource.MediaType;
+            var parent = FolderUrl(parentDirectoryId) ?? fileResource.Parent;
+            var enabled = isEnabledPublicLink ?? fileResource.PublicLink.Enabled;
+            if (fileResource.DisplayName == displayName && fileResource.MediaType == mediaType
+                && fileResource.Parent == parent && fileResource.PublicLink.Enabled == enabled) { return SugarSyncHttpResponse.Success; }
+            fileResource.DisplayName = displayName;
+            fileResource.MediaType = mediaType;
+            fileResource.Parent = parent;
+            fileResource.PublicLink.Enabled = enabled;
+
+            return await SugarSyncHttpClient.PutXmlAsync(this, FileUrl(fileId), fileResource);
+        }
+
+        /// <summary>
+        /// ファイルを完全に削除します。
+        /// https://www.sugarsync.com/dev/api/method/delete-file.html
+        /// </summary>
+        /// <param name="fileId"> ファイルを示すID? </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse> DeleteFileAsync(string fileId)
+        {
+            return await SugarSyncHttpClient.DeleteAsync(this, FileUrl(fileId));
+        }
+
+        /// <summary>
+        /// バージョン履歴はSugarSyncによって保持されているファイルの全てのバージョンの履歴を表します。
+        /// SugarSyncはファイルの過去5バージョンを保持していることに注意してください。
+        /// 
+        /// 提出されたファイルへのバージョン履歴にアクセスします。
+        /// https://www.sugarsync.com/dev/api/method/get-version-history.html
+        /// </summary>
+        /// <param name="fileId"> ファイルを示すID? </param>
+        /// <returns></returns>
+        public async Task<SugarSyncHttpResponse<FileVersionsResource>> RetrieveVersionHistoryAsync(string fileId)
+        {
+            return await SugarSyncHttpClient.GetAsync<FileVersionsResource>(this, FileUrl(fileId) + "/version");
         }
     }
 }

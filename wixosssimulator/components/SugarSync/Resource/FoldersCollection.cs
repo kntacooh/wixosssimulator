@@ -33,7 +33,7 @@ namespace WixossSimulator.SugarSync
 
             /// <summary> A link to the folder or the sync folder. </summary>
             [XmlElement("ref")]
-            public string ReferenceUrl { get; set; }
+            public string Ref { get; set; }
 
             /// <summary> A link to the contents of the folder or the sync folder. </summary>
             [XmlElement("contents")]
@@ -48,11 +48,11 @@ namespace WixossSimulator.SugarSync
 
             /// <summary> A link to the file. </summary>
             [XmlElement("ref")]
-            public string ReferenceUrl { get; set; }
+            public string Ref { get; set; }
 
             /// <summary> The size in bytes of the file. </summary>
             [XmlElement("size")]
-            public long Size { get; set; }
+            public long? Size { get; set; }
 
             [XmlElement("lastModified")]
             public string LastModifiedString
@@ -74,7 +74,7 @@ namespace WixossSimulator.SugarSync
 
             /// <summary> Whether the file is on the server (true) or not (false). </summary>
             [XmlElement("presentOnServer")]
-            public bool PresentOnServer { get; set; }
+            public bool? PresentOnServer { get; set; }
 
             /// <summary> A link to the data for the file. </summary>
             [XmlElement("fileData")]
@@ -84,13 +84,13 @@ namespace WixossSimulator.SugarSync
 
 
         [XmlAttribute("end")]
-        public long End { get; set; }
+        public long? End { get; set; }
 
         [XmlAttribute("hasMore")]
-        public bool HasMore { get; set; }
+        public bool? HasMore { get; set; }
 
         [XmlAttribute("start")]
-        public long Start { get; set; }
+        public long? Start { get; set; }
 
         [XmlElement("collection")]
         public List<CollectionElement> Collection { get; set; }

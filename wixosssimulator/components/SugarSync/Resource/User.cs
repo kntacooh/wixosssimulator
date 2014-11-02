@@ -20,10 +20,10 @@ namespace WixossSimulator.SugarSync
         {
             /// <summary> The total storage available to the user, in bytes. </summary>
             [XmlElement("limit")]
-            public long Limit { get; set; }
+            public long? Limit { get; set; }
             /// <summary> The total storage in use by the user, in bytes. </summary>
             [XmlElement("usage")]
-            public long Usage { get; set; }
+            public long? Usage { get; set; }
         }
 
 
@@ -99,6 +99,6 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> The maximum size of a file for which the user can create a public link. </summary>
         [XmlElement("maximumPublicLinkSize")]
-        public long MaximumPublicLinkSize { get; set; }
+        public long? MaximumPublicLinkSize { get; set; }
     }
 }

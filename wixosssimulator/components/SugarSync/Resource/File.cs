@@ -18,18 +18,18 @@ namespace WixossSimulator.SugarSync
         public class PublicLinkElement
         {
             [XmlAttribute("enabled")]
-            public bool Enabled { get; set; }
+            public bool? Enabled { get; set; }
         }
 
         public class ImageElement
         {
             /// <summary> The height in pixels of the image. </summary>
             [XmlElement("height")]
-            public long Height { get; set; }
+            public long? Height { get; set; }
 
             /// <summary> The width in pixels of the image. </summary>
             [XmlElement("width")]
-            public long Width { get; set; }
+            public long? Width { get; set; }
 
             /// <summary> The angular rotation of the image. </summary>
             [XmlElement("rotation")]
@@ -45,6 +45,8 @@ namespace WixossSimulator.SugarSync
         /// <summary> A SugarSync identifier that uniquely identifies the file resource. </summary>
         [XmlElement("dsid")]
         public string Dsid { get; set; }
+        //[XmlIgnore] //プロパティにするなら必要
+        public string GetFileId() { return Dsid.Substring(Dsid.LastIndexOf('/') + 1); }
 
         [XmlElement("timeCreated")]
         public string TimeCreatedString
@@ -66,7 +68,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> The size of the file. </summary>
         [XmlElement("size")]
-        public long Size { get; set; }
+        public long? Size { get; set; }
 
         [XmlElement("lastModified")]
         public string LastModifiedString
@@ -88,7 +90,7 @@ namespace WixossSimulator.SugarSync
 
         /// <summary> Whether the file is on the server (true) or not (false). </summary>
         [XmlElement("presentOnServer")]
-        public bool PresentOnServer { get; set; }
+        public bool? PresentOnServer { get; set; }
 
         /// <summary> A link to the data in the file. </summary>
         [XmlElement("fileData")]
